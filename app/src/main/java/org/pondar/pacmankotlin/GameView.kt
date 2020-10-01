@@ -13,23 +13,15 @@ import android.view.View
 
 
 //note we now create our own view class that extends the built-in View class
-class GameView : View , View.OnTouchListener{
+class GameView : View {
 
     private var game: Game? = null
     private var h: Int = 0
     private var w: Int = 0 //used for storing our height and width of the view
 
-    val mainHandler = Handler(Looper.getMainLooper())
 
-    val updatePos = object : Runnable {
-        override fun run() {
-            game?.speed = game?.speed?.plus(2)!!
-            Log.d("MATRIX", game?.speed.toString())
-            invalidate()
 
-            mainHandler.postDelayed(this, 10)
-        }
-    }
+
 
     fun setGame(game: Game?) {
         this.game = game
@@ -50,7 +42,7 @@ class GameView : View , View.OnTouchListener{
     //drawn whenever we update the screen.
     override fun onDraw(canvas: Canvas) {
 
-        this.setOnTouchListener(this)
+
 
         //Here we get the height and weight
         h = canvas.height
@@ -89,30 +81,4 @@ class GameView : View , View.OnTouchListener{
     }
 
 
-    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
-
-        val x = event!!.x.toInt() -40
-        val y = event.y.toInt() -40
-
-        when (event.action) {
-            MotionEvent.ACTION_DOWN -> {
-                game?.InitialX = x
-                game?.InitialY = y
-            }
-            MotionEvent.ACTION_MOVE -> Log.d("", "")
-            MotionEvent.ACTION_UP -> {
-               game?.EndX = x - game?.InitialX!!
-                game?.EndY = y - game?.InitialY!!
-                Log.i("TAG", "${game?.EndX} ${game?.EndY}")
-
-            game?.setPacPosition(x , y)
-
-                //mainHandler.post(updatePos)
-            }
-        }
-        invalidate()
-
-
-        return true
-    }
 }
