@@ -1,17 +1,38 @@
 package org.pondar.pacmankotlin
 
 import android.content.pm.ActivityInfo
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 
-class MainActivity : AppCompatActivity() {
+
+class MainActivity : AppCompatActivity(), View.OnClickListener  {
 
     //reference to the game class.
     private var game: Game? = null
+    val mainHandler = Handler(Looper.getMainLooper())
+
+    var isMovign = 0
+    var comparee = 0
+
+    val updatePos = object : Runnable {
+        override fun run() {
+            if(comparee > 0){
+                comparee--
+                game?.normalize()
+                Log.d("Move", isMovign.toString() + "HE IS HERE")
+            }
+            mainHandler.postDelayed(this, 10)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,9 +45,22 @@ class MainActivity : AppCompatActivity() {
         game?.setGameView(gameView)
         gameView.setGame(game)
         game?.newGame()
-        moveRight.setOnClickListener {
-            game?.movePacmanRight(10)
-        }
+//
+//        reset.setOnClickListener { game?.resetPos() }
+//
+//        moveRight.setOnTouchListener(RepeatListener(10, 5, View.OnClickListener {
+//            isMovign++
+//            comparee = isMovign
+//            game?.coins?.forEach { coin -> game?.doCollisionCheck(coin) }
+//           // Log.d("MESSAGE", isMovign.toString())
+//            game?.movePacmanRight(3)
+//        }))
+
+
+
+
+       // mainHandler.post(updatePos)
+
 
 
     }
@@ -52,4 +86,20 @@ class MainActivity : AppCompatActivity() {
         }
         return super.onOptionsItemSelected(item)
     }
+
+
+    override fun onClick(view : View?){
+
+        if(view?.id == R.id.moveRight){
+            mainHandler.post(updatePos)
+
+        }
+
+
+    }
+
+
+
+
+
 }

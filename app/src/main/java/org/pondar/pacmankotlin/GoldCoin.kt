@@ -1,4 +1,24 @@
 package org.pondar.pacmankotlin
 
-//Here you need to fill out what should be in a GoldCoin and what should the constructor be
-class GoldCoin() {}
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+
+
+class GoldCoin(xPos: Int, yPos: Int, context: Context, var id: Int) {
+
+
+
+    var goldX = xPos
+    var goldY = yPos
+    var goldBitmap: Bitmap
+    var isCollected = false
+
+    init{
+       goldBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.coin)
+    }
+
+
+
+
+}
