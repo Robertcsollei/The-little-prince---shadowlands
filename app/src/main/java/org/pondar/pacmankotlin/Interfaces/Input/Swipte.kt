@@ -1,8 +1,7 @@
-package org.pondar.pacmankotlin.Input
+package org.pondar.pacmankotlin.Interfaces.Input
 
 import android.view.View
 import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.activity_main.view.*
 import org.pondar.pacmankotlin.R
 
 class Swipte(var view: View) {

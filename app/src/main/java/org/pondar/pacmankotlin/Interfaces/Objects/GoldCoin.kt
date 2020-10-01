@@ -1,4 +1,4 @@
-package org.pondar.pacmankotlin.Objects
+package org.pondar.pacmankotlin.Interfaces.Objects
 
 import android.content.Context
 import android.graphics.Bitmap

@@ -7,7 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.TextView
-import org.pondar.pacmankotlin.Objects.GoldCoin
+import org.pondar.pacmankotlin.Interfaces.Objects.GoldCoin
 import java.lang.Math.pow
 import java.util.ArrayList
 import kotlin.math.sqrt
