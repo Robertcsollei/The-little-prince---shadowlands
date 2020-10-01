@@ -1,9 +1,8 @@
 package org.pondar.pacmankotlin
 
+import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -12,28 +11,21 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import java.util.*
 
 
-class MainActivity : AppCompatActivity(), View.OnClickListener  {
+class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchListener  {
 
     //reference to the game class.
     private var game: Game? = null
-    val mainHandler = Handler(Looper.getMainLooper())
 
-    var isMovign = 0
-    var comparee = 0
+    val TimerFunction: Timer = Timer()
 
-    val updatePos = object : Runnable {
-        override fun run() {
-            if(comparee > 0){
-                comparee--
-                game?.normalize()
-                Log.d("Move", isMovign.toString() + "HE IS HERE")
-            }
-            mainHandler.postDelayed(this, 10)
-        }
-    }
+    var updateMS = 10;
 
+
+
+    @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -41,20 +33,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
         setContentView(R.layout.activity_main)
         game = Game(this,pointsView)
 
+        gameView.setOnTouchListener(this)
+
 
         game?.setGameView(gameView)
         gameView.setGame(game)
         game?.newGame()
-//
-//        reset.setOnClickListener { game?.resetPos() }
-//
-//        moveRight.setOnTouchListener(RepeatListener(10, 5, View.OnClickListener {
-//            isMovign++
-//            comparee = isMovign
-//            game?.coins?.forEach { coin -> game?.doCollisionCheck(coin) }
-//           // Log.d("MESSAGE", isMovign.toString())
-//            game?.movePacmanRight(3)
-//        }))
+
+        TimerFunction.schedule(object :TimerTask(){
+            override fun run(){
+                UpdateFunction()
+            }
+        }, 0, 10)
 
 
 
@@ -63,6 +53,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
 
 
 
+    }
+
+
+    fun UpdateFunction() {
+        this.runOnUiThread(Update)
+    }
+
+    val Update = Runnable {
+        //TODO
+        //Player Motion
+        game?.setPacPosition(10)
+        //Object Motion
+        //Enemy Motion
+        //Projectile Motion
+        //Collision detection
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -90,14 +95,42 @@ class MainActivity : AppCompatActivity(), View.OnClickListener  {
 
     override fun onClick(view : View?){
 
-        if(view?.id == R.id.moveRight){
-            mainHandler.post(updatePos)
 
-        }
 
 
     }
 
+
+
+    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
+
+        val x = event!!.x.toInt() -40
+        val y = event.y.toInt() -40
+
+        when (event.action) {
+            MotionEvent.ACTION_DOWN -> {
+                game?.InitialX = x
+                game?.InitialY = y
+                game?.isMoving = !game?.isMoving!!
+            }
+            MotionEvent.ACTION_MOVE -> Log.d("", "")
+            MotionEvent.ACTION_UP -> {
+                game?.EndX = x - game?.InitialX!!
+                game?.EndY = y - game?.InitialY!!
+                Log.i("TAG", "${game?.EndX} ${game?.EndY}")
+
+                if(game?.isMoving!!) {
+                    game?.setPacPosition(10)
+                }
+
+                //mainHandler.post(updatePos)
+            }
+        }
+        gameView.invalidate()
+
+
+        return true
+    }
 
 
 
