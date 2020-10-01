@@ -7,7 +7,7 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.TextView
-import java.lang.Math.floor
+import org.pondar.pacmankotlin.Objects.GoldCoin
 import java.lang.Math.pow
 import java.util.ArrayList
 import kotlin.math.sqrt
@@ -37,7 +37,9 @@ class Game(private var context: Context,view: TextView) {
         var EndX = 0
         var EndY = 0
 
-        var speed = 50
+        var speed = 2
+
+        var isMoving = false
 
         var acceleration:Double = 2.0
         var accSpeed = 5.0
@@ -146,10 +148,11 @@ class Game(private var context: Context,view: TextView) {
 
     }
 
-    fun setPacPosition(x: Int, y: Int) {
+    fun setPacPosition(ms: Int) {
         if(!(EndX in 50 downTo -50 && EndY in 50 downTo -50)) {
+
             var len = sqrt(pow(EndX.toDouble(), 2.0) + pow(EndY.toDouble(), 2.0))
-            Log.d("MATRIX", len.toString() + " " + (EndX / len).toString())
+
             pacx += EndX / len * speed
             pacy += EndY / len * speed
         }
