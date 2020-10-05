@@ -1,16 +1,16 @@
 package org.pondar.pacmankotlin
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.TextView
+import org.pondar.pacmankotlin.GameEntities.GenerateEnemies
+import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
+import org.pondar.pacmankotlin.Interfaces.Characters.PacMan
 import org.pondar.pacmankotlin.Interfaces.Objects.GoldCoin
-import java.lang.Math.pow
 import java.util.ArrayList
-import kotlin.math.sqrt
 
 
 /**
@@ -27,28 +27,15 @@ class Game(private var context: Context,view: TextView) {
         private var pointsView: TextView = view
         private var points : Int = 0
         //bitmap of the pacman
-        var pacBitmap: Bitmap
-        var pacx: Double = 0.0
-        var pacy: Double = 0.0
+        lateinit var PacMan: PacMan
 
-        var InitialX = 0
-        var InitialY = 0
+        var enemyGenerator: GenerateEnemies = GenerateEnemies()
 
-        var EndX = 0
-        var EndY = 0
-
-        var speed = 2
-
-        var isMoving = false
-
-        var acceleration:Double = 2.0
-        var accSpeed = 5.0
-
-        var descSpeed = 0.5
+        var enemies: ArrayList<Enemy> = ArrayList()
 
         val updatePos = object : Runnable {
             override fun run() {
-                speed += 2
+                PacMan.speed += 2
 
                 mainHandler.postDelayed(this, 10)
             }
@@ -70,33 +57,26 @@ class Game(private var context: Context,view: TextView) {
 
 
     init {
-        pacBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.pacman)
+        PacMan = PacMan(5, BitmapFactory.decodeResource(context.resources, R.drawable.pacman),
+                        50.0,50.0)
 
-    }
-
-    fun accelerate(){
-        acceleration *= accSpeed
-    }
-
-    fun normalize() {
-        if(acceleration > 0.0){
-            acceleration -= descSpeed
-        }
-        if(acceleration < 0.0){
-            acceleration += descSpeed
-        }
     }
 
     fun setGameView(view: GameView) {
         this.gameView = view
+
+
     }
 
     //TODO initialize goldcoins also here
     fun initializeGoldcoins() {
         coinsInitialized = true
 
-        if(coinsInitialized) {
 
+        if(coinsInitialized) {
+            enemies = enemyGenerator.InitializeEnemies(2, context,
+                    this.gameView?.w,
+                    this.gameView?.h)
             var counter = 0
 
             var offsetX = 200
@@ -114,8 +94,8 @@ class Game(private var context: Context,view: TextView) {
 
 
     fun newGame() {
-        pacx = 50.0
-        pacy = 400.0 //just some starting coordinates - you can change this.
+        PacMan.posX = 50.0
+        PacMan.posY = 400.0 //just some starting coordinates - you can change this.
         //reset the points
         coinsInitialized = false
         points = 0
@@ -127,34 +107,17 @@ class Game(private var context: Context,view: TextView) {
         this.w = w
     }
     fun resetPos () {
-        pacx = 50.0
-        pacy = 50.0
+        PacMan.posX = 50.0
+        PacMan.posY = 50.0
         gameView!!.invalidate()
     }
 
-
-    fun movePacmanRight(pixels: Int) {
-        //still within our boundaries?
-
-
-        if (pacx + pixels + pacBitmap.width < w) {
-            acceleration += accSpeed
-            var newSpeed = pixels + acceleration
-            Log.d("speed", "$acceleration $accSpeed")
-            pacx += newSpeed.toInt()
-
-            gameView!!.invalidate()
-        }
-
-    }
-
     fun setPacPosition(ms: Int) {
-        if(!(EndX in 50 downTo -50 && EndY in 50 downTo -50)) {
 
-            var len = sqrt(pow(EndX.toDouble(), 2.0) + pow(EndY.toDouble(), 2.0))
+        PacMan.keepMoving()
 
-            pacx += EndX / len * speed
-            pacy += EndY / len * speed
+        enemies.forEach {
+            it.move(1,1, this , gameView!! )
         }
 
         coins.forEachIndexed { index, goldCoin ->
@@ -179,7 +142,7 @@ class Game(private var context: Context,view: TextView) {
     fun doCollisionCheck(coin: GoldCoin, index: Int) {
 
         if(!coin.isCollected){
-            if(pacx in coin.goldX- coinRadius .. coin.goldX+coinRadius && pacy in coin.goldY-coinRadius.. coin.goldY+coinRadius){
+            if(PacMan.posX in coin.goldX- coinRadius .. coin.goldX+coinRadius && PacMan.posY in coin.goldY-coinRadius.. coin.goldY+coinRadius){
                 coin.isCollected = true
                 delCoin = index
                 Log.d("Collected", coin.id.toString())
