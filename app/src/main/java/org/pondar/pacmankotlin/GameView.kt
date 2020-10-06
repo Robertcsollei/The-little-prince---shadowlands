@@ -16,11 +16,8 @@ import android.view.View
 class GameView : View {
 
     private var game: Game? = null
-    private var h: Int = 0
-    private var w: Int = 0 //used for storing our height and width of the view
-
-
-
+    var h: Int = 0
+    var w: Int = 0 //used for storing our height and width of the view
 
 
     fun setGame(game: Game?) {
@@ -63,14 +60,26 @@ class GameView : View {
         canvas.drawColor(Color.WHITE) //clear entire canvas to white color
 
         //draw the pacman
-        canvas.drawBitmap(game!!.pacBitmap, game?.pacx!!.toFloat(),
-                game?.pacy!!.toFloat(), paint)
+        canvas.drawBitmap(game!!.PacMan.picture, game?.PacMan?.posX!!.toFloat(),
+                game?.PacMan?.posY!!.toFloat(), paint)
 
 
         if(game!!.coinsInitialized){
             for(coin in game?.coins!!){
                 canvas.drawBitmap(coin!!.goldBitmap, coin?.goldX!!.toFloat(),
                         coin?.goldY!!.toFloat(), paint)
+            }
+            // Initialize Enemies
+            for (enemy in game?.enemies!!){
+                canvas.drawBitmap(enemy.picture, enemy.posX.toFloat(), enemy.posY.toFloat(), paint)
+            }
+        }
+
+        for (enemy in game?.enemies!!){
+            if (enemy.isShooting){
+                canvas.drawCircle(enemy.posX.toFloat(), enemy.posY.toFloat(), 10.toFloat(), paint)
+                enemy.Projectile.initPos(enemy.posX.toInt(), enemy.posY.toInt())
+                enemy.Projectile.move()
             }
         }
 

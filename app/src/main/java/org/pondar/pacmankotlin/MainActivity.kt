@@ -109,19 +109,14 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                game?.InitialX = x
-                game?.InitialY = y
-                game?.isMoving = !game?.isMoving!!
+                game?.PacMan?.InitialX = x
+                game?.PacMan?.InitialY = y
+                game?.PacMan?.isMoving = !game?.PacMan?.isMoving!!
             }
             MotionEvent.ACTION_MOVE -> Log.d("", "")
             MotionEvent.ACTION_UP -> {
-                game?.EndX = x - game?.InitialX!!
-                game?.EndY = y - game?.InitialY!!
-                Log.i("TAG", "${game?.EndX} ${game?.EndY}")
 
-                if(game?.isMoving!!) {
-                    game?.setPacPosition(10)
-                }
+                game?.PacMan?.move(x,y, game!!, gameView!!)
 
                 //mainHandler.post(updatePos)
             }
