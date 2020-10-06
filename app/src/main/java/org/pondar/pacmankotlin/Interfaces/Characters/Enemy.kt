@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import org.pondar.pacmankotlin.Game
 import org.pondar.pacmankotlin.Interfaces.GameActions.Collision
+import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
 import java.util.*
 
 class Enemy(override val life: Int, override val picture: Bitmap,
@@ -17,6 +18,8 @@ class Enemy(override val life: Int, override val picture: Bitmap,
     override var EndX = 0
     override var EndY = 0
     override var speed = 3
+    var Projectile: Projectile = Projectile()
+    var isShooting: Boolean = false
 
     var BitmapImage : Bitmap = resizeBitmap(picture,150)
     var movingForward: Boolean = true
@@ -25,6 +28,9 @@ class Enemy(override val life: Int, override val picture: Bitmap,
         Log.d("Canvas" , "" + screenWidth)
         if (movingForward){
             posX += speed
+
+            isShooting = posX % 35 == 0.0
+
             if (posX >= screenWidth-250)
                 movingForward = false
         }

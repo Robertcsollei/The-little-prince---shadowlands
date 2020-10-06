@@ -75,6 +75,14 @@ class GameView : View {
             }
         }
 
+        for (enemy in game?.enemies!!){
+            if (enemy.isShooting){
+                canvas.drawCircle(enemy.posX.toFloat(), enemy.posY.toFloat(), 10.toFloat(), paint)
+                enemy.Projectile.initPos(enemy.posX.toInt(), enemy.posY.toInt())
+                enemy.Projectile.move()
+            }
+        }
+
         //TODO loop through the list of goldcoins and draw them.
 
 
