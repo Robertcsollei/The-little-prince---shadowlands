@@ -3,7 +3,6 @@ package org.pondar.pacmankotlin
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -11,6 +10,7 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 import java.util.*
 
 
@@ -22,6 +22,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
     val TimerFunction: Timer = Timer()
 
     var updateMS = 10;
+
+    var switchedDirection : Boolean = false
 
 
 
@@ -63,7 +65,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
     val Update = Runnable {
         //TODO
         //Player Motion
-        game?.setPacPosition(10)
+        game?.setPacPosition()
         //Object Motion
         //Enemy Motion
         //Projectile Motion
@@ -104,21 +106,25 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
 
-        val x = event!!.x.toInt() -40
-        val y = event.y.toInt() -40
 
-        when (event.action) {
+
+        when (event!!.action) {
             MotionEvent.ACTION_DOWN -> {
-                game?.PacMan?.InitialX = x
-                game?.PacMan?.InitialY = y
+                game?.aimForm = Vector2D(game?.PacMan?.Pos!!.x + 75, game?.PacMan?.Pos!!.y +75)
+                game?.PacMan?.Initial = Vector2D(event.x, event.y)
                 game?.PacMan?.isMoving = !game?.PacMan?.isMoving!!
             }
-            MotionEvent.ACTION_MOVE -> Log.d("", "")
+            MotionEvent.ACTION_MOVE -> {
+
+                game?.aimAt = Vector2D(event.x, event.y)
+            }
             MotionEvent.ACTION_UP -> {
+                game?.PacMan?.timer = 100
+                game?.aimAt = Vector2D()
+                game?.aimForm = Vector2D()
+                game?.PacMan?.move( Vector2D(event.x, event.y) , game!!, gameView!!)
 
-                game?.PacMan?.move(x,y, game!!, gameView!!)
 
-                //mainHandler.post(updatePos)
             }
         }
         gameView.invalidate()

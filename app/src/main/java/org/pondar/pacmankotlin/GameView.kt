@@ -1,15 +1,11 @@
 package org.pondar.pacmankotlin
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
-import android.os.Handler
-import android.os.Looper
+import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 
 
 //note we now create our own view class that extends the built-in View class
@@ -19,6 +15,8 @@ class GameView : View {
     var h: Int = 0
     var w: Int = 0 //used for storing our height and width of the view
 
+
+    var newMatrix = Matrix()
 
     fun setGame(game: Game?) {
         this.game = game
@@ -37,6 +35,7 @@ class GameView : View {
 
     //In the onDraw we put all our code that should be
     //drawn whenever we update the screen.
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
 
 
@@ -59,29 +58,50 @@ class GameView : View {
         val paint = Paint()
         canvas.drawColor(Color.WHITE) //clear entire canvas to white color
 
-        //draw the pacman
-        canvas.drawBitmap(game!!.PacMan.picture, game?.PacMan?.posX!!.toFloat(),
-                game?.PacMan?.posY!!.toFloat(), paint)
+        val mPath: Path
+        mPath = Path()
+        mPath.moveTo(game!!.aim().shape.left, game!!.aim().shape.top)
+        mPath.quadTo(game!!.aim().shape.left, game!!.aim().shape.top ,game!!.aim().shape.top, game!!.aim().shape.bottom )
 
+        fun drawLine(shape: Shape2D){
+
+            return canvas.drawLine(shape.left, shape.top, shape.right, shape.bottom, paint)
+        }
+        fun drawRect(shape: Shape2D){
+
+            return canvas.drawRect(shape.left, shape.top, shape.right, shape.bottom, paint)
+        }
+
+        newMatrix.setRotate(game?.PacMan!!.NewAngle)
+
+        var pacBit = Bitmap.createBitmap(game?.PacMan!!.bitmap!!,0, 0, 140, 140, newMatrix, true)
+        canvas.drawBitmap(pacBit, game?.PacMan!!.Pos.x, game?.PacMan!!.Pos.y, paint)
 
         if(game!!.coinsInitialized){
-            for(coin in game?.coins!!){
-                canvas.drawBitmap(coin!!.goldBitmap, coin?.goldX!!.toFloat(),
-                        coin?.goldY!!.toFloat(), paint)
+
+
+            for(GameEntity in game?.GameObjects!!){
+                if(GameEntity.bitmap != null){
+                canvas.drawBitmap(GameEntity.bitmap!!, GameEntity.Pos.x,
+                        GameEntity.Pos.y, paint)
+                }else{
+                    drawRect(GameEntity.shape)
+                }
+
             }
+            paint.setAntiAlias(true);
+            paint.setStrokeWidth(6f);
+
+            paint.setColor(Color.BLACK);
+            paint.setStyle(Paint.Style.STROKE);
+            paint.setStrokeJoin(Paint.Join.ROUND);
+            paint.setPathEffect( DashPathEffect(floatArrayOf(5F, 10F), 0F))
+            drawLine(game!!.aim().shape)
+
             // Initialize Enemies
-            for (enemy in game?.enemies!!){
-                canvas.drawBitmap(enemy.picture, enemy.posX.toFloat(), enemy.posY.toFloat(), paint)
-            }
         }
 
-        for (enemy in game?.enemies!!){
-            if (enemy.isShooting){
-                canvas.drawCircle(enemy.posX.toFloat(), enemy.posY.toFloat(), 10.toFloat(), paint)
-                enemy.Projectile.initPos(enemy.posX.toInt(), enemy.posY.toInt())
-                enemy.Projectile.move()
-            }
-        }
+
 
         //TODO loop through the list of goldcoins and draw them.
 

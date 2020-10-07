@@ -12,12 +12,7 @@ class GenerateEnemies {
     var Enemies: ArrayList<Enemy> = ArrayList()
 
     fun InitializeEnemies(numberOfEnemies: Int, context: Context, CanvasWidth: Int?, CanvasHeight: Int?) : ArrayList<Enemy>{
-        val random = Random()
-        for (x in 0..numberOfEnemies){
-            Enemies.add(Enemy(1, BitmapFactory.decodeResource(context.resources, R.drawable.enemy),
-                    random.nextInt(1600).toDouble(), random.nextInt(1600).toDouble(),
-                    CanvasWidth!!, CanvasHeight!!))
-        }
+
 
         return Enemies
     }
