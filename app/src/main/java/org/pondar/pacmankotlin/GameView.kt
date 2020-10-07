@@ -72,10 +72,14 @@ class GameView : View {
             return canvas.drawRect(shape.left, shape.top, shape.right, shape.bottom, paint)
         }
 
-        newMatrix.setRotate(game?.PacMan!!.NewAngle)
+        //newMatrix.setRotate(game?.PacMan!!.NewAngle)
 
-        var pacBit = Bitmap.createBitmap(game?.PacMan!!.bitmap!!,0, 0, 140, 140, newMatrix, true)
+        var pacBit = Bitmap.createBitmap(game?.PacMan!!.bitmap!!,0, 0, 80, 160, newMatrix, true)
         canvas.drawBitmap(pacBit, game?.PacMan!!.Pos.x, game?.PacMan!!.Pos.y, paint)
+
+        canvas.drawBitmap(game?.SpaceShip?.bitmap!!, game?.SpaceShip?.Pos!!.x, game?.SpaceShip?.Pos!!.y, paint )
+
+        canvas.drawBitmap(game?.Explosion?.bitmap!!, game?.Explosion?.Pos!!.x, game?.Explosion?.Pos!!.y, paint)
 
         if(game!!.coinsInitialized){
 

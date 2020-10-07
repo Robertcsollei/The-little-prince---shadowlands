@@ -1,6 +1,8 @@
 package org.pondar.pacmankotlin.Interfaces.Characters
 
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.util.Log
 import android.view.View
@@ -9,7 +11,9 @@ import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 import org.pondar.pacmankotlin.Interfaces.GameActions.Collider
+import org.pondar.pacmankotlin.R
 import kotlin.math.PI
+import kotlin.math.cos
 
 class PacMan(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?) : ICharacter, Object2D {
 
@@ -30,25 +34,25 @@ class PacMan(override val life: Int, override var shape: Shape2D, override var b
     var temptimer= 0
     var reset = 1F
     var NewAngle = 0F
-
+    var switchImage = 0
 
     override fun move(EndPos: Vector2D, game: Game, view: View){
-       Direction = EndPos.Substract(Initial)
-
+       Direction = game.aimAt.Substract(game.aimForm)
+Log.d("AAASSSDD", "${Direction.x} - ${Direction.y}")
 
         if(isMoving) {
-            game.setPacPosition()
+            game.setPacPosition(false)
         }
         view.invalidate()
     }
 
-    fun keepMoving(w: Int, h: Int, GameObejct: ArrayList<Object2D>, game: Game){
+    fun keepMoving(w: Int, h: Int, GameObejct: ArrayList<Object2D>, context: Context ,invodeSprite: Boolean, SpriteImages: ArrayList<Int>, game: Game ){
         if(!(Direction.x.toInt() in SwipeTrashhold downTo -SwipeTrashhold && Direction.y.toInt() in SwipeTrashhold downTo -SwipeTrashhold)) {
 
 
 
             GameObejct.forEach{
-                var collider = Collider(it, Pos, it.Size)
+
 
 
                 if(it.isCollectable){
@@ -79,11 +83,11 @@ class PacMan(override val life: Int, override var shape: Shape2D, override var b
             }
 
             //Walls collision
-            if(Pos.x > w - 75|| Pos.x < 10){
+            if(Pos.x > w - 140|| Pos.x < 10){
                 Direction = Vector2D(Direction.x * -1, Direction.y )
 
             }
-            if(Pos.y > h - 75|| Pos.y < 10){
+            if(Pos.y > h - 140|| Pos.y < 10){
                 Direction = Vector2D(Direction.x, Direction.y * -1)
 
             }
@@ -101,6 +105,7 @@ class PacMan(override val life: Int, override var shape: Shape2D, override var b
                     reset -= 0.01F
                     if(temptimer == timer +1){
                         reset = 0F
+                        bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.empty)
                     }
                 }
                 temptimer--
@@ -149,7 +154,14 @@ class PacMan(override val life: Int, override var shape: Shape2D, override var b
                 }
             }
 
-
+            if(invodeSprite){
+                if(switchImage < 8) {
+                    bitmap = BitmapFactory.decodeResource(context.resources, SpriteImages.elementAt(switchImage))
+                }else{
+                    switchImage = 0
+                }
+                switchImage++
+            }
 
 
             //Apply Direction
@@ -157,7 +169,8 @@ class PacMan(override val life: Int, override var shape: Shape2D, override var b
             Pos.y += Direct.y
 
 
-            NewAngle = (oneSide * 180 / PI ).toFloat()
+            //NewAngle = (oneSide * 60 /  2 * PI   ).toFloat()
+            Log.d("GDGFHGJTYD", NewAngle.toString())
 
 
 
