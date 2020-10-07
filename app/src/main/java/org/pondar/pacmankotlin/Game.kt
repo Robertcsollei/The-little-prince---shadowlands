@@ -1,15 +1,17 @@
 package org.pondar.pacmankotlin
 
 import android.content.Context
-import android.graphics.BitmapFactory
-import android.os.Handler
-import android.os.Looper
 import android.util.Log
 import android.widget.TextView
-import org.pondar.pacmankotlin.GameEntities.GenerateEnemies
+import org.pondar.pacmankotlin.GameEntities.GenerateObjects
 import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
 import org.pondar.pacmankotlin.Interfaces.Characters.PacMan
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
+import org.pondar.pacmankotlin.Interfaces.GameActions.Collider
 import org.pondar.pacmankotlin.Interfaces.Objects.GoldCoin
+import org.pondar.pacmankotlin.Interfaces.Objects.Wall
 import java.util.ArrayList
 
 
@@ -20,7 +22,6 @@ import java.util.ArrayList
 
 class Game(private var context: Context,view: TextView) {
 
-        val mainHandler = Handler(Looper.getMainLooper())
 
 
 
@@ -29,25 +30,28 @@ class Game(private var context: Context,view: TextView) {
         //bitmap of the pacman
         lateinit var PacMan: PacMan
 
-        var enemyGenerator: GenerateEnemies = GenerateEnemies()
+    var GenerateObjects = GenerateObjects(context, 0, 0)
 
         var enemies: ArrayList<Enemy> = ArrayList()
 
-        val updatePos = object : Runnable {
-            override fun run() {
-                PacMan.speed += 2
+        var GameObjects = ArrayList<Object2D>()
 
-                mainHandler.postDelayed(this, 10)
-            }
-        }
+            var switchedDirection = false
 
         //did we initialize the coins?
         var coinsInitialized = false
+
+    var counter = 0
 
         //the list of goldcoins - initially empty
         var coins = ArrayList<GoldCoin>()
 
         var coinRadius = 80.0
+
+
+
+        var aimForm = Vector2D()
+        var aimAt = Vector2D()
 
         var delCoin = -1
         //a reference to the gameview
@@ -55,12 +59,9 @@ class Game(private var context: Context,view: TextView) {
          var h: Int = 0
          var w: Int = 0 //height and width of screen
 
-
-    init {
-        PacMan = PacMan(5, BitmapFactory.decodeResource(context.resources, R.drawable.pacman),
-                        50.0,50.0)
-
-    }
+init{
+    PacMan = GenerateObjects.InitPlayer()
+}
 
     fun setGameView(view: GameView) {
         this.gameView = view
@@ -74,31 +75,25 @@ class Game(private var context: Context,view: TextView) {
 
 
         if(coinsInitialized) {
-            enemies = enemyGenerator.InitializeEnemies(2, context,
-                    this.gameView?.w,
-                    this.gameView?.h)
-            var counter = 0
+            GenerateObjects = GenerateObjects(context, w, h)
 
-            var offsetX = 200
-            var offsetY = 200
+            GameObjects = GenerateObjects.InitEnvironment()
 
-            for (x in 0..4) {
-                for (y in 0..4) {
-                    coins.add(GoldCoin(offsetX * x, offsetY * y, context, counter))
-                    counter++
-                }
-            }
+
         }
 
     }
 
 
     fun newGame() {
-        PacMan.posX = 50.0
-        PacMan.posY = 400.0 //just some starting coordinates - you can change this.
+
         //reset the points
         coinsInitialized = false
+        PacMan.Initial = Vector2D()
+        PacMan.Direction = Vector2D()
+        PacMan.Pos = Vector2D(200F,900F)
         points = 0
+        counter = 0
         pointsView.text = "${context.resources.getString(R.string.points)} $points"
         gameView?.invalidate() //redraw screen
     }
@@ -107,28 +102,39 @@ class Game(private var context: Context,view: TextView) {
         this.w = w
     }
     fun resetPos () {
-        PacMan.posX = 50.0
-        PacMan.posY = 50.0
+        PacMan.Pos = Vector2D(200F,800F)
         gameView!!.invalidate()
     }
 
-    fun setPacPosition(ms: Int) {
 
-        PacMan.keepMoving()
+    fun aim() : Wall{
 
-        enemies.forEach {
-            it.move(1,1, this , gameView!! )
-        }
+            return Wall(context, Shape2D(aimForm, aimAt , 1))
+    }
 
-        coins.forEachIndexed { index, goldCoin ->
+    fun setPacPosition() {
+
+
+
+
+
+//        GameObjects.forEach {
+//            if(!it.isStatic) {
+//                (Enemy)it.move(1, 1, this, gameView!!)
+//            }
+//        }
+
+        GameObjects.forEachIndexed { index, goldCoin ->
             doCollisionCheck(goldCoin, index)
         }
+
+        PacMan.keepMoving(w, h, GameObjects, this)
+
         if(delCoin > 0){
-            coins.removeAt(delCoin)
+            GameObjects.removeAt(delCoin)
             delCoin = -1
         }
         gameView!!.invalidate()
-        Log.d("Log", "gameView.toString()")
 
     }
 
@@ -139,16 +145,31 @@ class Game(private var context: Context,view: TextView) {
     //for the gold coins and the points
     //so you need to go through the arraylist of goldcoins and
     //check each of them for a collision with the pacman
-    fun doCollisionCheck(coin: GoldCoin, index: Int) {
+    fun doCollisionCheck(Object: Object2D, index: Int) {
+        var collider = Collider(Object, PacMan.Pos, Object.Size)
 
-        if(!coin.isCollected){
-            if(PacMan.posX in coin.goldX- coinRadius .. coin.goldX+coinRadius && PacMan.posY in coin.goldY-coinRadius.. coin.goldY+coinRadius){
-                coin.isCollected = true
-                delCoin = index
-                Log.d("Collected", coin.id.toString())
+        if(Object.isCollectable){
 
+            if(!Object.isCollected) {
+
+                if (collider.isColliding()) {
+                    Object.OnCollison()
+                    delCoin = index
+                    counter++
+                    pointsView.text = "${context.resources.getString(R.string.points)} $counter"
+                    Log.d("COOLSS", delCoin.toString())
+
+
+                }
             }
+        }else{
+
+
+//            if (collider.isColliding()) {
+//                GesturePos = Vector2D()
+//            }
         }
+
 
     }
 

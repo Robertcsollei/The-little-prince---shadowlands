@@ -5,43 +5,50 @@ import android.graphics.BitmapFactory
 import android.util.Log
 import android.view.View
 import org.pondar.pacmankotlin.Game
-import org.pondar.pacmankotlin.Interfaces.GameActions.Collision
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
-import java.util.*
 
-class Enemy(override val life: Int, override val picture: Bitmap,
-            override var posX: Double, override var posY: Double,
-            var screenWidth: Int, var screenHeight: Int) : ICharacter{
+class Enemy(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?) : ICharacter, Object2D{
 
-    override var InitialX = 0
-    override var InitialY = 0
-    override var EndX = 0
-    override var EndY = 0
-    override var speed = 3
+
+    var screenWidth = 550;
+    override var speed = 2.0F
+    override var isStatic: Boolean = false
+    override var isCollectable: Boolean = false
+    override var isCollected: Boolean = false
+    override var Pos: Vector2D = shape.pos
+    override var Size: Vector2D = Vector2D(bitmap?.width?.toFloat()!!, bitmap?.height?.toFloat()!!)
+    override var Initial: Vector2D = Vector2D()
+    override var Direction: Vector2D = Vector2D()
     var Projectile: Projectile = Projectile()
     var isShooting: Boolean = false
 
-    var BitmapImage : Bitmap = resizeBitmap(picture,150)
     var movingForward: Boolean = true
 
-    override fun move(initialX: Int, initialY: Int, game: Game, view: View) {
+
+
+
+
+    override fun move(Initialize: Vector2D, game: Game, view: View) {
         Log.d("Canvas" , "" + screenWidth)
         if (movingForward){
-            posX += speed
+            Pos.x += speed
 
-            isShooting = posX % 35 == 0.0
+            //isShooting = Pos.x % 35 == 0.0
 
-            if (posX >= screenWidth-250)
+            if (Pos.x >= screenWidth-250)
                 movingForward = false
         }
         else {
-            posX -= speed
-            if(posX <= 5)
+            Pos.x -= speed
+            if(Pos.x <= 5)
                 movingForward = true
         }
     }
 
-    override fun collision() {
+    override fun OnCollison() {
         TODO("Not yet implemented")
     }
 
