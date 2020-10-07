@@ -1,8 +1,14 @@
 package org.pondar.pacmankotlin
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.pm.ActivityInfo
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -14,16 +20,16 @@ import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 import java.util.*
 
 
-class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchListener  {
+class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListener  {
 
     //reference to the game class.
     private var game: Game? = null
 
     val TimerFunction: Timer = Timer()
 
-    var updateMS = 10;
+    var updateMS = 0;
 
-    var switchedDirection : Boolean = false
+    lateinit var sensorManager: SensorManager
 
 
 
@@ -37,6 +43,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
 
         gameView.setOnTouchListener(this)
 
+        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
+        sensorManager.registerListener(
+                this,
+                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_GAME
+        )
 
         game?.setGameView(gameView)
         gameView.setGame(game)
@@ -63,9 +75,18 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
     }
 
     val Update = Runnable {
-        //TODO
-        //Player Motion
-        game?.setPacPosition()
+        var playExplosion = game?.playExplosion
+        updateMS += 10
+        if(updateMS >= 200){
+            updateMS = 0
+            game?.setPacPosition(true)
+        }
+
+        if (updateMS >= 200 && playExplosion!!){
+            game?.setPacPosition(false)
+        }
+        game?.setPacPosition(false)
+
         //Object Motion
         //Enemy Motion
         //Projectile Motion
@@ -95,13 +116,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
     }
 
 
-    override fun onClick(view : View?){
-
-
-
-
-    }
-
 
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
@@ -110,19 +124,21 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
 
         when (event!!.action) {
             MotionEvent.ACTION_DOWN -> {
-                game?.aimForm = Vector2D(game?.PacMan?.Pos!!.x + 75, game?.PacMan?.Pos!!.y +75)
-                game?.PacMan?.Initial = Vector2D(event.x, event.y)
+                game?.PacMan?.Pos = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
+                game?.PacMan?.Initial = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
                 game?.PacMan?.isMoving = !game?.PacMan?.isMoving!!
             }
             MotionEvent.ACTION_MOVE -> {
-
+                game?.PacMan?.Pos = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
+                game?.aimForm = Vector2D(game?.SpaceShip!!.Pos.x + 100, game?.SpaceShip!!.Pos.y + 100)
                 game?.aimAt = Vector2D(event.x, event.y)
             }
             MotionEvent.ACTION_UP -> {
                 game?.PacMan?.timer = 100
+                game?.PacMan?.move( Vector2D(event.x, event.y) , game!!, gameView!!)
+
                 game?.aimAt = Vector2D()
                 game?.aimForm = Vector2D()
-                game?.PacMan?.move( Vector2D(event.x, event.y) , game!!, gameView!!)
 
 
             }
@@ -133,7 +149,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener, View.OnTouchList
         return true
     }
 
+    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
 
+    }
+
+    override fun onSensorChanged(event: SensorEvent?) {
+      game?.ShipPos = event?.values?.get(0)!!
+    }
 
 
 }

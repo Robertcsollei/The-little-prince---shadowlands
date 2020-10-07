@@ -6,6 +6,7 @@ import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
 import org.pondar.pacmankotlin.Interfaces.Characters.PacMan
+import org.pondar.pacmankotlin.Interfaces.Characters.SpaceShip
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
@@ -27,12 +28,11 @@ class GenerateObjects(var context: Context, var w: Int, var h: Int) {
     var Xunits = w / 5
     var Yunits = h / 8
 
-
-    var bounds = 500
+    var Ship = R.drawable.ship
 
     var Enemy = R.drawable.enemy
 
-    var Player = R.drawable.pacman
+    var Player = R.drawable.frame1
 
     var Maps = Maps()
 
@@ -44,6 +44,11 @@ class GenerateObjects(var context: Context, var w: Int, var h: Int) {
         var player = BitmapFactory.decodeResource(context.resources, Player)
 
         return PacMan(5, Shape2D(Vector2D(), Vector2D(), null), player)
+    }
+
+    fun InitShip(): SpaceShip {
+        var Ship = BitmapFactory.decodeResource(context.resources, Ship)
+        return SpaceShip(5, Shape2D(Vector2D(), Vector2D(), null), Ship, h)
     }
 
     fun InitEntities() {
