@@ -108,11 +108,11 @@ class Collider(var Object: Object2D, var Pos: Vector2D, var size: Vector2D) {
     fun OutOfBoundCollision(game: Game, w: Int, h: Int) {
         if (Pos.x > w - size.x || Pos.x < 10) {
             Log.d("FFFFFF", "RRRRR")
-            game.newGame()
+            Vector2D(Direction.x * -1, Direction.y)
         }
         if (Pos.y > h - size.y || Pos.y < 10) {
 
-            game.newGame()
+            Vector2D(Direction.x, Direction.y * -1)
         }
     }
 
