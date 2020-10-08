@@ -14,6 +14,7 @@ import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 import org.pondar.pacmankotlin.Interfaces.GameActions.Collider
 import org.pondar.pacmankotlin.R
 import kotlin.math.PI
+import kotlin.math.acos
 import kotlin.math.cos
 
 class FireBall(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?, override var Xunit: Int, override var Yunit: Int) : ICharacter, Object2D {
@@ -105,13 +106,31 @@ class FireBall(override val life: Int, override var shape: Shape2D, override var
 
 
             var a = Direction.Normalize(1F)
-            var b = Vector2D(0F,1F)
-            var a0 = a.x* b.x + a.y * b.y
+
+            var b = Vector2D(1F,0F)
+
+            var t = Vector2D(0F,1F)
+
+            var p = Vector2D(0.5F,0.5F)
+
+            var dotProduct = a.dotProduct(b)
+
+            var dott = t.dotProduct(b)
+
+            var dotp = p.dotProduct(b)
+
+            var newAngle = dotProduct / (a.Length() * b.Length())
+
+            var newAngle1 = dott / (t.Length() * b.Length())
+
+            var newAngle2 = dotp / (p.Length() * b.Length())
 
 
-            var oneSide = a0 / (a.Length() * b.Length())
+            Log.d("ANGLESXXX", newAngle.toString() + " X")
 
-            Log.d("NEWMATRIX", oneSide.toString())
+            Log.d("ANGLESXXX", newAngle1.toString() + " Y")
+
+            Log.d("ANGLESXXX", newAngle2.toString() + " 45")
 
             fun hack(degree: Float): Int{
                 if(Pos.x > w / 2){

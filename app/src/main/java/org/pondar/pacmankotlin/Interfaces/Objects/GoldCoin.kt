@@ -3,10 +3,12 @@ package org.pondar.pacmankotlin.Interfaces.Objects
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import org.pondar.pacmankotlin.Game
 import org.pondar.pacmankotlin.Interfaces.Adapters.BitMapConverter
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
+import org.pondar.pacmankotlin.Interfaces.GameActions.Collider
 
 
 class GoldCoin(context: Context, newShape: Shape2D, var XUnit: Int, var YUnit: Int) : Object2D{
@@ -22,6 +24,7 @@ class GoldCoin(context: Context, newShape: Shape2D, var XUnit: Int, var YUnit: I
     override var isCollectable: Boolean = true
     override var isCollected = false
     var ResizeBit = BitMapConverter()
+    var speed: Float = 2F
 
     init{
 
@@ -31,6 +34,13 @@ class GoldCoin(context: Context, newShape: Shape2D, var XUnit: Int, var YUnit: I
     override fun OnCollison() {
         isCollected = true
 
+    }
+
+    fun keepMoving(game: Game) {
+
+
+
+        Pos.y += speed
     }
 
 

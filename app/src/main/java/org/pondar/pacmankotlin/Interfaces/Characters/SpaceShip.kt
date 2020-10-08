@@ -8,10 +8,12 @@ import org.pondar.pacmankotlin.Interfaces.Adapters.BitMapConverter
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
+import org.pondar.pacmankotlin.Interfaces.GameActions.Collider
 import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
 import java.lang.Math.floor
 
-class SpaceShip (override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?, override var Xunit: Int, override var Yunit: Int) : Object2D, ICharacter {
+class SpaceShip (override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?,
+                 override var Xunit: Int, override var Yunit: Int) : Object2D, ICharacter {
 
 
     var screenWidth = 550;
@@ -32,7 +34,8 @@ class SpaceShip (override val life: Int, override var shape: Shape2D, override v
     var movingForward: Boolean = true
 
     fun keepMoving(AccePos: Float, width: Int, Height: Int) {
-        // -10 - 10 - width / 2 -AccePos * with/ 2 / 10
+
+
         var newPos = width / 2 - AccePos * width/ 2 / 12
         Pos = Vector2D(floor(newPos.toDouble()).toInt().toFloat(), (Height / 8 * 7).toFloat())
 

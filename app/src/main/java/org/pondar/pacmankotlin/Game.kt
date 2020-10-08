@@ -67,7 +67,7 @@ class Game(var context: Context, view: TextView) {
 
     var isShooting = false
 
-    lateinit var projectile : Projectile
+    var projectile = Projectile(Vector2D(500F, 500F), w/5, h/8, context, null)
 
     var isNewLevel : Boolean = false
     var mapNo: Int = 0
@@ -96,14 +96,14 @@ class Game(var context: Context, view: TextView) {
             Enemies = GenerateObjects.Enemies
             randomPos = randomEnemyShooting()
             randomEnemy = Enemies.elementAt(randomPos)
-            if(randomPos != -1){
+
                 if(!isShooting){
-                    projectile = Projectile(randomEnemy.Pos, w/5, h/8, context)
+                    projectile = Projectile(randomEnemy.Pos, w/5, h/8, context, this)
                     isShooting = true
                     projectile.isShooting = true
                 }
 
-            }
+
             Log.d("JKFHJHKD", randomEnemyShooting().toString())
 //            randomEnemy = Enemies.get(randomEnemyShooting())
 
@@ -139,7 +139,8 @@ class Game(var context: Context, view: TextView) {
     fun newGame() {
 
         //reset the points
-        randomPos = -1
+        isShooting = false
+        projectile =  Projectile(Vector2D(500F, 500F), w/5, h/8, context, null)
         coinsInitialized = false
         fireBall.Initial = Vector2D()
         fireBall.Direction = Vector2D()
@@ -217,6 +218,7 @@ class Game(var context: Context, view: TextView) {
         var collider = Collider(Object, fireBall.Pos, Object.Size)
 
         if (Object.isCollectable) {
+            collider = Collider(Object, SpaceShip.Pos, Object.Size)
 
             if (!Object.isCollected) {
 

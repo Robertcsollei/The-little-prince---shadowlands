@@ -48,6 +48,12 @@ class Vector2D(VecX: Float, VecY:Float){
         return RotResult
     }
 
+    fun dotProduct(targetVector: Vector2D): Float{
+        var dotProduct  = 0F
+        dotProduct =  this.x* targetVector.x + this.y * targetVector.y
+        return dotProduct
+    }
+
     constructor() : this(0F,0F)
 
 
