@@ -28,7 +28,7 @@ class GoldCoin(context: Context, newShape: Shape2D, var XUnit: Int, var YUnit: I
 
     init{
 
-        bitmap = ResizeBit.resizeBitmap(bitmap!!, XUnit/3)
+        bitmap = ResizeBit.resizeBitmap(bitmap!!, XUnit)
     }
 
     override fun OnCollison() {

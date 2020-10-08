@@ -194,7 +194,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
         SensorInput.add(event?.values?.get(0)!!)
         if(SensorInput.count() > 30){
             var LastInput = SensorInput.subList(SensorInput.count() - 20, SensorInput.count())
-            var result = LastInput.average()
+            var result = LastInput.average() *2
             game?.ShipPos = result.toFloat()
         }else{
             game?.ShipPos = 0.0F
