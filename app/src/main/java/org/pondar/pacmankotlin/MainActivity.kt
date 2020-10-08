@@ -12,6 +12,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
+import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
@@ -39,9 +40,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
 
     lateinit var sensorManager: SensorManager
 
-    var SensorData : ArrayList<Float> = ArrayList()
-
-
+    var isPaused = false
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,8 +78,22 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
 
     }
 
+    fun pauseContinue(view: View){
+        val buttonID = resources.getIdentifier("pauseBTN", "id", packageName)
+        val button = findViewById<Button>(buttonID)
+        if (!isPaused){
+            button.text = "Continue"
+            isPaused = true
+        }else {
+            button.text = "Pause"
+            isPaused = false
+        }
+    }
+
     fun UpdateFunction() {
-        this.runOnUiThread(Update)
+        if(!isPaused) {
+            this.runOnUiThread(Update)
+        }
     }
 
     val Update = Runnable {
