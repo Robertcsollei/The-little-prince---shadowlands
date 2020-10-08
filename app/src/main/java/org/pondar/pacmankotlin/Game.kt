@@ -226,6 +226,7 @@ class Game(var context: Context, view: TextView) {
                     Object.OnCollison()
                     delCoin = index
                     Log.d("COOLSS", delCoin.toString())
+                    newGame()
 
 
                 }
