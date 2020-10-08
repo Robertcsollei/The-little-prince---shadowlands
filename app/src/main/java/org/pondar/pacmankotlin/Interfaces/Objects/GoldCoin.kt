@@ -9,7 +9,7 @@ import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 
 
-class GoldCoin(context: Context, newShape: Shape2D) : Object2D{
+class GoldCoin(context: Context, newShape: Shape2D, var XUnit: Int, var YUnit: Int) : Object2D{
 
     override var shape: Shape2D = newShape
 
@@ -25,7 +25,7 @@ class GoldCoin(context: Context, newShape: Shape2D) : Object2D{
 
     init{
 
-        bitmap = ResizeBit.resizeBitmap(bitmap!!, 60)
+        bitmap = ResizeBit.resizeBitmap(bitmap!!, XUnit/3)
     }
 
     override fun OnCollison() {

@@ -11,7 +11,8 @@ import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 
-class Enemy(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?, override var Xunit: Int, override var Yunit: Int) : ICharacter, Object2D{
+class Enemy(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?,
+            override var Xunit: Int, override var Yunit: Int) : ICharacter, Object2D{
 
     var newSize : Int = Xunit
 
@@ -30,14 +31,13 @@ class Enemy(override val life: Int, override var shape: Shape2D, override var bi
     var movingForward: Boolean = true
     var isDestroyed : Boolean = false
 
-
     init {
         bitmap = ResizeBitmap.resizeBitmap(bitmap!!, newSize)
         Matrix.postRotate(180F)
-        var newBit = Bitmap.createBitmap(bitmap!!, 0,0, bitmap!!.width, bitmap!!.height, Matrix, false)
+        var newBit = Bitmap.createBitmap(bitmap!!, 0,0, bitmap!!.width,
+                bitmap!!.height, Matrix, false)
         bitmap = newBit
     }
-
 
     override fun move(Initialize: Vector2D, game: Game, view: View) {
         Log.d("Canvas" , "" + screenWidth)
@@ -56,8 +56,20 @@ class Enemy(override val life: Int, override var shape: Shape2D, override var bi
         }
     }
 
-    fun shoot(){
+    fun keepMoving(w: Int, h: Int){
+        if (movingForward){
+            Pos.x += speed
 
+            //isShooting = Pos.x % 35 == 0.0
+
+            if (Pos.x >= w-newSize*2)
+                movingForward = false
+        }
+        else {
+            Pos.x -= speed
+            if(Pos.x <= newSize)
+                movingForward = true
+        }
     }
 
     override fun OnCollison() {

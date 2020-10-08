@@ -15,10 +15,12 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import org.intellij.lang.annotations.Flow
 import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListener  {
@@ -33,6 +35,8 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
     var updateLong = 0
 
     lateinit var sensorManager: SensorManager
+
+    var SensorData : ArrayList<Float> = ArrayList()
 
 
 
@@ -72,13 +76,11 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
 
     }
 
-
     fun UpdateFunction() {
         this.runOnUiThread(Update)
     }
 
     val Update = Runnable {
-
 
         var playExplosion = game?.playExplosion
         updateMS += 10
@@ -109,8 +111,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
         game?.GameObjects?.forEach {
             if(it is Enemy){
 
-                it.move(game?.fireBall?.Initial!!, game!!, gameView )
-
+                it.keepMoving( game?.w!!, game?.h!!)
 
             }
         }
@@ -120,10 +121,6 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
         //Projectile Motion
         //Collision detection
     }
-
-
-
-
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -146,9 +143,6 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
         }
         return super.onOptionsItemSelected(item)
     }
-
-
-
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
 
@@ -183,7 +177,17 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-      game?.ShipPos = event?.values?.get(0)!!
+        SensorData.add(event?.values?.get(0)!!)
+
+        if (SensorData.count() > 30){
+            var avgArray : List<Float> = SensorData.drop(SensorData.count() -29)
+            var avg = avgArray.average()
+
+            game?.ShipPos = avg.toFloat()
+        }
+        else {
+            game?.ShipPos = event?.values?.get(0)!!
+        }
     }
 
 
