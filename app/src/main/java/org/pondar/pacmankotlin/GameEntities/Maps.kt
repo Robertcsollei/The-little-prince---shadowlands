@@ -14,12 +14,12 @@ class Maps (){
             arrayListOf(0,0,0,0,0))
 
     var level02 = arrayListOf(
-            arrayListOf(3,0,2,0,3),
+            arrayListOf(3,0,0,2,3),
             arrayListOf(3,0,1,0,3),
             arrayListOf(3,0,2,0,3),
             arrayListOf(3,1,0,0,3),
-            arrayListOf(3,0,1,0,3),
-            arrayListOf(3,0,2,0,3),
+            arrayListOf(3,2,1,0,3),
+            arrayListOf(3,0,0,0,3),
             arrayListOf(3,0,1,0,3),
             arrayListOf(0,0,0,0,0))
 
@@ -27,9 +27,9 @@ class Maps (){
             arrayListOf(0,0,2,0,0),
             arrayListOf(0,2,0,1,0),
             arrayListOf(0,0,0,0,0),
-            arrayListOf(0,2,0,2,0),
-            arrayListOf(0,0,0,0,0),
             arrayListOf(0,0,0,2,0),
+            arrayListOf(0,0,0,0,0),
+            arrayListOf(2,0,0,0,0),
             arrayListOf(0,0,0,0,0),
             arrayListOf(0,0,0,0,0))
 
