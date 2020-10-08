@@ -8,7 +8,6 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -16,7 +15,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
+import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
+import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
 import java.util.*
 
 
@@ -27,7 +28,9 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
 
     val TimerFunction: Timer = Timer()
 
-    var updateMS = 0;
+    var updateMS = 0
+
+    var updateLong = 0
 
     lateinit var sensorManager: SensorManager
 
@@ -75,11 +78,26 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
     }
 
     val Update = Runnable {
+
+
         var playExplosion = game?.playExplosion
         updateMS += 10
+        updateLong += 10
         if(updateMS >= 200){
             updateMS = 0
             game?.setPacPosition(true)
+        }
+
+        if(updateLong >= 200){
+
+                if (game?.projectile?.isShooting!!){
+                    game?.projectile?.keepMoving()
+
+                    if(updateLong >= 8000){
+                        updateLong = 0
+                        game?.isShooting = false
+                    }
+            }
         }
 
         if (updateMS >= 200 && playExplosion!!){
@@ -87,11 +105,25 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
         }
         game?.setPacPosition(false)
 
+
+        game?.GameObjects?.forEach {
+            if(it is Enemy){
+
+                it.move(game?.fireBall?.Initial!!, game!!, gameView )
+
+
+            }
+        }
+
         //Object Motion
         //Enemy Motion
         //Projectile Motion
         //Collision detection
     }
+
+
+
+
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -120,26 +152,23 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
 
     override fun onTouch(v: View?, event: MotionEvent?): Boolean {
 
-
-
         when (event!!.action) {
             MotionEvent.ACTION_DOWN -> {
-                game?.PacMan?.Pos = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
-                game?.PacMan?.Initial = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
-                game?.PacMan?.isMoving = !game?.PacMan?.isMoving!!
+                game?.fireBall?.Pos = Vector2D(game?.SpaceShip!!.Pos.x + game?.fireBall!!.Resize, game?.SpaceShip!!.Pos.y + game?.fireBall!!.Resize)
+                game?.fireBall?.Initial = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
+                game?.fireBall?.isMoving = !game?.fireBall?.isMoving!!
             }
             MotionEvent.ACTION_MOVE -> {
-                game?.PacMan?.Pos = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
-                game?.aimForm = Vector2D(game?.SpaceShip!!.Pos.x + 100, game?.SpaceShip!!.Pos.y + 100)
+                game?.fireBall?.Pos = Vector2D(game?.SpaceShip!!.Pos.x + game?.SpaceShip!!.Size.x/2, game?.SpaceShip!!.Pos.y + game?.SpaceShip!!.Size.y/2)
+                game?.aimForm = Vector2D(game?.SpaceShip!!.Pos.x + game?.SpaceShip!!.Size.x/2, game?.SpaceShip!!.Pos.y + game?.SpaceShip!!.Size.y/2)
                 game?.aimAt = Vector2D(event.x, event.y)
             }
             MotionEvent.ACTION_UP -> {
-                game?.PacMan?.timer = 100
-                game?.PacMan?.move( Vector2D(event.x, event.y) , game!!, gameView!!)
+                game?.fireBall?.timer = gameView.width/7
+                game?.fireBall?.move( Vector2D(event.x, event.y) , game!!, gameView!!)
 
                 game?.aimAt = Vector2D()
                 game?.aimForm = Vector2D()
-
 
             }
         }

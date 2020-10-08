@@ -2,16 +2,18 @@ package org.pondar.pacmankotlin.Interfaces.Characters
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Matrix
 import android.util.Log
 import android.view.View
 import org.pondar.pacmankotlin.Game
+import org.pondar.pacmankotlin.Interfaces.Adapters.BitMapConverter
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
-import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
 
-class Enemy(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?) : ICharacter, Object2D{
+class Enemy(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?, override var Xunit: Int, override var Yunit: Int) : ICharacter, Object2D{
 
+    var newSize : Int = Xunit
 
     var screenWidth = 550;
     override var speed = 2.0F
@@ -19,16 +21,22 @@ class Enemy(override val life: Int, override var shape: Shape2D, override var bi
     override var isCollectable: Boolean = false
     override var isCollected: Boolean = false
     override var Pos: Vector2D = shape.pos
-    override var Size: Vector2D = Vector2D(bitmap?.width?.toFloat()!!, bitmap?.height?.toFloat()!!)
+    override var Size: Vector2D = Vector2D(newSize.toFloat(), newSize.toFloat())
     override var Initial: Vector2D = Vector2D()
     override var Direction: Vector2D = Vector2D()
-    var Projectile: Projectile = Projectile()
+    override var ResizeBitmap: BitMapConverter = BitMapConverter()
     var isShooting: Boolean = false
-
+    var Matrix: Matrix = Matrix()
     var movingForward: Boolean = true
+    var isDestroyed : Boolean = false
 
 
-
+    init {
+        bitmap = ResizeBitmap.resizeBitmap(bitmap!!, newSize)
+        Matrix.postRotate(180F)
+        var newBit = Bitmap.createBitmap(bitmap!!, 0,0, bitmap!!.width, bitmap!!.height, Matrix, false)
+        bitmap = newBit
+    }
 
 
     override fun move(Initialize: Vector2D, game: Game, view: View) {
@@ -38,44 +46,23 @@ class Enemy(override val life: Int, override var shape: Shape2D, override var bi
 
             //isShooting = Pos.x % 35 == 0.0
 
-            if (Pos.x >= screenWidth-250)
+            if (Pos.x >= screenWidth-newSize)
                 movingForward = false
         }
         else {
             Pos.x -= speed
-            if(Pos.x <= 5)
+            if(Pos.x <= newSize)
                 movingForward = true
         }
     }
 
+    fun shoot(){
+
+    }
+
     override fun OnCollison() {
-        TODO("Not yet implemented")
+        this.isDestroyed = true
     }
 
-    fun resizeBitmap(source: Bitmap, maxLength: Int): Bitmap {
-        try {
-            if (source.height >= source.width) {
-                if (source.height <= maxLength) { // if image height already smaller than the required height
-                    return source
-                }
 
-                val aspectRatio = source.width.toDouble() / source.height.toDouble()
-                val targetWidth = (maxLength * aspectRatio).toInt()
-                val result = Bitmap.createScaledBitmap(source, targetWidth, maxLength, false)
-                return result
-            } else {
-                if (source.width <= maxLength) { // if image width already smaller than the required width
-                    return source
-                }
-
-                val aspectRatio = source.height.toDouble() / source.width.toDouble()
-                val targetHeight = (maxLength * aspectRatio).toInt()
-
-                val result = Bitmap.createScaledBitmap(source, maxLength, targetHeight, false)
-                return result
-            }
-        } catch (e: Exception) {
-            return source
-        }
-    }
 }
