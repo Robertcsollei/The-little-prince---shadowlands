@@ -22,7 +22,7 @@ class Exposion (var context: Context) {
         bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.exploasion1)
     }
 
-    fun Explode(coundDown: Int, DestoryedPos: Vector2D, game: Game, context: Context) {
+    fun Explode( DestoryedPos: Vector2D, game: Game, context: Context) {
         Pos = DestoryedPos
 
         if(switchImage < 7) {

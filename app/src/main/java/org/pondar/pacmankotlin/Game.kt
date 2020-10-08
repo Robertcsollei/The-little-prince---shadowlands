@@ -2,20 +2,19 @@ package org.pondar.pacmankotlin
 
 import android.content.Context
 import android.util.Log
-import android.widget.Space
 import android.widget.TextView
 import org.pondar.pacmankotlin.GameEntities.GenerateObjects
 import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
-import org.pondar.pacmankotlin.Interfaces.Characters.PacMan
+import org.pondar.pacmankotlin.Interfaces.Characters.FireBall
 import org.pondar.pacmankotlin.Interfaces.Characters.SpaceShip
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 import org.pondar.pacmankotlin.Interfaces.GameActions.Collider
 import org.pondar.pacmankotlin.Interfaces.GameActions.Exposion
-import org.pondar.pacmankotlin.Interfaces.Objects.GoldCoin
+import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
 import org.pondar.pacmankotlin.Interfaces.Objects.Wall
-import java.util.ArrayList
+import java.util.*
 
 
 /**
@@ -23,14 +22,14 @@ import java.util.ArrayList
  * This class should contain all your game logic
  */
 
-class Game(private var context: Context, view: TextView) {
+class Game(var context: Context, view: TextView) {
 
 
     private var pointsView: TextView = view
     private var points: Int = 0
 
     //bitmap of the pacman
-    lateinit var PacMan: PacMan
+    lateinit var fireBall: FireBall
     lateinit var SpaceShip: SpaceShip
 
     var GenerateObjects = GenerateObjects(context, 0, 0)
@@ -54,7 +53,7 @@ class Game(private var context: Context, view: TextView) {
             R.drawable.frame4, R.drawable.frame5, R.drawable.frame6, R.drawable.frame7, R.drawable.frame8)
 
     var Explosion: Exposion = Exposion(context)
-    var ExplosionPos = Vector2D()
+    lateinit var ExplosionPos: Vector2D
     var playExplosion: Boolean = false
 
     //a reference to the gameview
@@ -62,9 +61,18 @@ class Game(private var context: Context, view: TextView) {
     var h: Int = 0
     var w: Int = 0 //height and width of screen
 
+    var Enemies: ArrayList<Enemy> = ArrayList()
+    lateinit var randomEnemy : Enemy
+    var randomPos = -1
+
+    var isShooting = false
+
+    lateinit var projectile : Projectile
+
     init {
-        PacMan = GenerateObjects.InitPlayer()
+        fireBall = GenerateObjects.InitPlayer()
         SpaceShip = GenerateObjects.InitShip()
+
     }
 
     fun setGameView(view: GameView) {
@@ -82,20 +90,41 @@ class Game(private var context: Context, view: TextView) {
             GenerateObjects = GenerateObjects(context, w, h)
 
             GameObjects = GenerateObjects.InitEnvironment()
+            Enemies = GenerateObjects.Enemies
+            randomPos = randomEnemyShooting()
+            randomEnemy = Enemies.elementAt(randomPos)
+            if(randomPos != -1){
+                if(!isShooting){
+                    projectile = Projectile(randomEnemy.Pos, w/5, h/8, context)
+                    isShooting = true
+                    projectile.isShooting = true
+                }
 
+            }
+            Log.d("JKFHJHKD", randomEnemyShooting().toString())
+//            randomEnemy = Enemies.get(randomEnemyShooting())
 
         }
 
     }
 
+    fun randomEnemyShooting(): Int{
+        //if ms % 200 0 - Rando Bger 0,5
+        var Random = Random()
+        return Random.nextInt(Enemies.count())
+    }
+
+
+
 
     fun newGame() {
 
         //reset the points
+        randomPos = -1
         coinsInitialized = false
-        PacMan.Initial = Vector2D()
-        PacMan.Direction = Vector2D()
-        PacMan.Pos = Vector2D(200F, 900F)
+        fireBall.Initial = Vector2D()
+        fireBall.Direction = Vector2D()
+        fireBall.Pos = Vector2D(SpaceShip.Pos.x + 50, SpaceShip.Pos.y + 50)
         points = 0
         counter = 0
         pointsView.text = "${context.resources.getString(R.string.points)} $points"
@@ -108,7 +137,7 @@ class Game(private var context: Context, view: TextView) {
     }
 
     fun resetPos() {
-        PacMan.Pos = Vector2D(200F, 800F)
+        fireBall.Pos = Vector2D(200F, 800F)
         gameView!!.invalidate()
     }
 
@@ -118,24 +147,35 @@ class Game(private var context: Context, view: TextView) {
         return Wall(context, Shape2D(aimForm, aimAt, 1))
     }
 
+
     fun setPacPosition(invodeSprite: Boolean) {
 
+        GameObjects.forEachIndexed { index, gameEntity ->
+            doCollisionCheck(gameEntity, index)
+        }
+//
+//        projectile = Projectile(randomEnemy.Pos, randomEnemy.Xunit, randomEnemy.Yunit, context)
+//
+//        if(invodeSprite){
+//            projectile.isShooting = true
+//        }
 
-        GameObjects.forEachIndexed { index, goldCoin ->
-            doCollisionCheck(goldCoin, index)
+
+
+        fireBall.keepMoving(w, h, GameObjects, context, invodeSprite, SpriteImages, this)
+
+        SpaceShip.keepMoving(ShipPos, w, h)
+
+        if (playExplosion) {
+            Explosion.Explode(ExplosionPos, this, context)
+
         }
 
-        PacMan.keepMoving(w, h, GameObjects, context, invodeSprite, SpriteImages, this)
-        SpaceShip.keepMoving(ShipPos, w )
-
-        if (playExplosion){
-            Explosion.Explode(2,ExplosionPos, this, context)
-
-        }
-
-        if (delCoin > 0) {
+        if (delCoin >= 0) {
             ExplosionPos = GameObjects[delCoin].Pos
+
             GameObjects.removeAt(delCoin)
+
             delCoin = -1
             playExplosion = true
         }
@@ -151,7 +191,7 @@ class Game(private var context: Context, view: TextView) {
     //so you need to go through the arraylist of goldcoins and
     //check each of them for a collision with the pacman
     fun doCollisionCheck(Object: Object2D, index: Int) {
-        var collider = Collider(Object, PacMan.Pos, Object.Size)
+        var collider = Collider(Object, fireBall.Pos, Object.Size)
 
         if (Object.isCollectable) {
 
@@ -167,12 +207,13 @@ class Game(private var context: Context, view: TextView) {
 
                 }
             }
-        } else {
+        } else if (!Object.isCollectable && !Object.isStatic) {
 
+            if (collider.isColliding()) {
+                Object.OnCollison()
+                delCoin = index
+            }
 
-//            if (collider.isColliding()) {
-//                GesturePos = Vector2D()
-//            }
         }
 
 

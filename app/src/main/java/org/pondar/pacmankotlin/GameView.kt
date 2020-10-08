@@ -5,7 +5,9 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import org.pondar.pacmankotlin.Interfaces.Adapters.BitMapConverter
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
+import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
 
 
 //note we now create our own view class that extends the built-in View class
@@ -15,13 +17,15 @@ class GameView : View {
     var h: Int = 0
     var w: Int = 0 //used for storing our height and width of the view
 
+    var ResizeBitmap: BitMapConverter = BitMapConverter()
 
     var newMatrix = Matrix()
 
     fun setGame(game: Game?) {
         this.game = game
     }
-
+    var background =  BitmapFactory.decodeResource(context.resources, R.drawable.bg)
+    val newbg = ResizeBitmap.resizeBitmap(background, 2500)
 
     /* The next 3 constructors are needed for the Android view system,
 	when we have a custom view.
@@ -56,7 +60,8 @@ class GameView : View {
 
         //Making a new paint object
         val paint = Paint()
-        canvas.drawColor(Color.WHITE) //clear entire canvas to white color
+
+        canvas.drawBitmap(newbg, 0F, 0F, paint) //clear entire canvas to white color
 
         val mPath: Path
         mPath = Path()
@@ -72,14 +77,21 @@ class GameView : View {
             return canvas.drawRect(shape.left, shape.top, shape.right, shape.bottom, paint)
         }
 
-        //newMatrix.setRotate(game?.PacMan!!.NewAngle)
 
-        var pacBit = Bitmap.createBitmap(game?.PacMan!!.bitmap!!,0, 0, 80, 160, newMatrix, true)
-        canvas.drawBitmap(pacBit, game?.PacMan!!.Pos.x, game?.PacMan!!.Pos.y, paint)
+
+        var BitSize = Vector2D(game?.fireBall!!.bitmap!!.width.toFloat(), game?.fireBall!!.bitmap!!.height.toFloat())
+
+        var pacBit = Bitmap.createBitmap(game?.fireBall!!.bitmap!!,0, 0, BitSize.x.toInt(), BitSize.y.toInt(), newMatrix, true)
+        canvas.drawBitmap(pacBit, game?.fireBall!!.Pos.x, game?.fireBall!!.Pos.y, paint)
+
+       if(game?.isShooting!!){
+           canvas.drawBitmap(game?.projectile!!.bitmap, game?.projectile!!.Pos.x, game?.projectile!!.Pos.y, paint)
+       }
 
         canvas.drawBitmap(game?.SpaceShip?.bitmap!!, game?.SpaceShip?.Pos!!.x, game?.SpaceShip?.Pos!!.y, paint )
-
-        canvas.drawBitmap(game?.Explosion?.bitmap!!, game?.Explosion?.Pos!!.x, game?.Explosion?.Pos!!.y, paint)
+        if (game?.playExplosion!!) {
+            canvas.drawBitmap(game?.Explosion?.bitmap!!, game?.Explosion?.Pos!!.x, game?.Explosion?.Pos!!.y, paint)
+        }
 
         if(game!!.coinsInitialized){
 
@@ -89,6 +101,7 @@ class GameView : View {
                 canvas.drawBitmap(GameEntity.bitmap!!, GameEntity.Pos.x,
                         GameEntity.Pos.y, paint)
                 }else{
+                    paint.setColor(Color.DKGRAY);
                     drawRect(GameEntity.shape)
                 }
 
@@ -96,7 +109,7 @@ class GameView : View {
             paint.setAntiAlias(true);
             paint.setStrokeWidth(6f);
 
-            paint.setColor(Color.BLACK);
+            paint.setColor(Color.WHITE);
             paint.setStyle(Paint.Style.STROKE);
             paint.setStrokeJoin(Paint.Join.ROUND);
             paint.setPathEffect( DashPathEffect(floatArrayOf(5F, 10F), 0F))

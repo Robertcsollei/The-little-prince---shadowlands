@@ -7,6 +7,7 @@ import android.graphics.Matrix
 import android.util.Log
 import android.view.View
 import org.pondar.pacmankotlin.Game
+import org.pondar.pacmankotlin.Interfaces.Adapters.BitMapConverter
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Object2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Shape2D
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
@@ -15,11 +16,11 @@ import org.pondar.pacmankotlin.R
 import kotlin.math.PI
 import kotlin.math.cos
 
-class PacMan(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?) : ICharacter, Object2D {
+class FireBall(override val life: Int, override var shape: Shape2D, override var bitmap: Bitmap?, override var Xunit: Int, override var Yunit: Int) : ICharacter, Object2D {
 
-    var isMoving = false
+    var isMoving = true
     var acceleration:Double = 0.1
-//    var accSpeed = 5.0
+    var Resize = 12
     var SwipeTrashhold = 50
     var descSpeed = 0.5
     override var speed = 15.0F
@@ -27,18 +28,26 @@ class PacMan(override val life: Int, override var shape: Shape2D, override var b
     override var isCollectable: Boolean = false
     override var isCollected: Boolean = false
     override var Pos: Vector2D = shape.pos
-    override var Size: Vector2D = Vector2D(bitmap?.width?.toFloat()!!, bitmap?.height?.toFloat()!!)
+    override var Size: Vector2D = Vector2D(Resize.toFloat(),Resize.toFloat())
     override var Initial: Vector2D = Vector2D()
     override var Direction: Vector2D = Vector2D()
+    override var ResizeBitmap: BitMapConverter = BitMapConverter()
     var timer: Int = 0
     var temptimer= 0
     var reset = 1F
     var NewAngle = 0F
     var switchImage = 0
+    var NewSize = 150
+
+
+    init {
+        bitmap = ResizeBitmap.resizeBitmap(bitmap!!, 12)
+    }
+
 
     override fun move(EndPos: Vector2D, game: Game, view: View){
        Direction = game.aimAt.Substract(game.aimForm)
-Log.d("AAASSSDD", "${Direction.x} - ${Direction.y}")
+        NewSize = view.height/12
 
         if(isMoving) {
             game.setPacPosition(false)
@@ -52,45 +61,14 @@ Log.d("AAASSSDD", "${Direction.x} - ${Direction.y}")
 
 
             GameObejct.forEach{
-
-
-
-                if(it.isCollectable){
-
-                    if(it.isCollected) {
-
-                        if(!(Pos.x in it.Pos.x - 10 .. it.Pos.x + 50)){
-                            Direction = Vector2D(Direction.x * -1, Direction.y )
-                        }else{
-
-                            Direction = Vector2D(Direction.x, Direction.y * -1)
-                        }
-
-                    }
-                }
-                if(it.isStatic && !it.isCollectable){
-
-                    if ((Pos.x + 50 in it.Pos.x - 50..  it.Pos.x + 150) && (Pos.y + 50 in it.Pos.y- 50 .. it.Pos.y + 150)) {
-
-                            Direction = Vector2D(Direction.x * -1, Direction.y )
-
-
-                            Direction = Vector2D(Direction.x, Direction.y * -1)
-
-                    }
-
-                }
-            }
-
-            //Walls collision
-            if(Pos.x > w - 140|| Pos.x < 10){
-                Direction = Vector2D(Direction.x * -1, Direction.y )
+                var collider: Collider = Collider(it, Pos, Direction)
+                Direction = collider.GeneralColision()
 
             }
-            if(Pos.y > h - 140|| Pos.y < 10){
-                Direction = Vector2D(Direction.x, Direction.y * -1)
 
-            }
+            //Out of Bounds
+           var BoundsCollider = Collider(this, Pos, Size)
+            BoundsCollider.OutOfBoundCollision(game, w, h)
 
 
 
@@ -99,25 +77,30 @@ Log.d("AAASSSDD", "${Direction.x} - ${Direction.y}")
                 reset = 1F
                 temptimer++
                 speed += acceleration.toFloat()
+                isMoving = true
             }
             if(temptimer > timer){
+                isMoving = true
                 if(temptimer < timer + 100 && reset > 0){
                     reset -= 0.01F
+
                     if(temptimer == timer +1){
                         reset = 0F
-                        bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.empty)
+                       isMoving = false
                     }
                 }
+
                 temptimer--
                 speed -= acceleration.toFloat()
             }
             if(temptimer == timer && timer != 0 && temptimer != 0){
                 timer = 0
                 reset = 1F
+                isMoving = false
             }
 
             //Set Direction
-            Log.d("MATRIIIXX", "${timer} - ${temptimer}")
+
             var Direct = Direction.Normalize(speed * reset)
 
 
@@ -156,12 +139,14 @@ Log.d("AAASSSDD", "${Direction.x} - ${Direction.y}")
 
             if(invodeSprite){
                 if(switchImage < 8) {
-                    bitmap = BitmapFactory.decodeResource(context.resources, SpriteImages.elementAt(switchImage))
+                    var newBit = BitmapFactory.decodeResource(context.resources, SpriteImages.elementAt(switchImage))
+                    bitmap = ResizeBitmap.resizeBitmap(newBit, NewSize)
                 }else{
                     switchImage = 0
                 }
                 switchImage++
             }
+
 
 
             //Apply Direction
@@ -179,18 +164,6 @@ Log.d("AAASSSDD", "${Direction.x} - ${Direction.y}")
         }
     }
 
-//    fun accelerate(){
-//        acceleration *= accSpeed
-//    }
-//
-//    fun normalize() {
-//        if(acceleration > 0.0){
-//            acceleration -= descSpeed
-//        }
-//        if(acceleration < 0.0){
-//            acceleration += descSpeed
-//        }
-//    }
 
     override fun OnCollison() {
 
