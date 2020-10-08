@@ -237,7 +237,7 @@ class Game(var context: Context, view: TextView) {
                 delCoin = index
                 counter++
 
-                if (counter >= 2 && mapNo < 3){
+                if (counter >= Enemies.count() && mapNo < 3){
                     Log.d("GAMELOGIC", "IF")
                     pointsView.text = "${context.resources.getString(R.string.points)} $counter"
                     mapNo ++
