@@ -23,7 +23,7 @@ import java.util.*
  */
 
 class Game(var context: Context, view: TextView) {
-
+    //Level number to load different maps
 
     private var pointsView: TextView = view
     private var points: Int = 0
@@ -69,6 +69,9 @@ class Game(var context: Context, view: TextView) {
 
     var projectile = Projectile(Vector2D(500F, 500F), w/5, h/8, context, null)
 
+    var isNewLevel : Boolean = false
+    var mapNo: Int = 0
+
     init {
         fireBall = GenerateObjects.InitPlayer()
         SpaceShip = GenerateObjects.InitShip()
@@ -89,7 +92,7 @@ class Game(var context: Context, view: TextView) {
         if (coinsInitialized) {
             GenerateObjects = GenerateObjects(context, w, h)
 
-            GameObjects = GenerateObjects.InitEnvironment()
+            LoadNewLevel(mapNo)
             Enemies = GenerateObjects.Enemies
             randomPos = randomEnemyShooting()
             randomEnemy = Enemies.elementAt(randomPos)
@@ -115,6 +118,22 @@ class Game(var context: Context, view: TextView) {
     }
 
 
+    fun LoadNewLevel(levelNo: Int){
+        Log.d("GAMELOGIC", "Load level: ${levelNo}")
+        GameObjects = if (mapNo > 0){
+
+            GenerateObjects.InitEnvironment(levelNo)
+
+
+        } else {
+            GenerateObjects.InitEnvironment(levelNo)
+        }
+        Log.d("GAMELOGIC", "List size: ${GameObjects.count()}")
+        Log.d("GAMEOBJ", "SIZE: ${GameObjects.count()}")
+        fireBall.Initial = Vector2D()
+        fireBall.Direction = Vector2D()
+        fireBall.Pos = Vector2D(SpaceShip.Pos.x + 50, SpaceShip.Pos.y + 50)
+    }
 
 
     fun newGame() {
@@ -144,24 +163,15 @@ class Game(var context: Context, view: TextView) {
 
 
     fun aim(): Wall {
-
         return Wall(context, Shape2D(aimForm, aimAt, 1))
     }
 
 
     fun setPacPosition(invodeSprite: Boolean) {
-
+        Log.d("GAMEOBJ", "SIZE: ${GameObjects.count()}")
         GameObjects.forEachIndexed { index, gameEntity ->
             doCollisionCheck(gameEntity, index)
         }
-//
-//        projectile = Projectile(randomEnemy.Pos, randomEnemy.Xunit, randomEnemy.Yunit, context)
-//
-//        if(invodeSprite){
-//            projectile.isShooting = true
-//        }
-
-
 
         fireBall.keepMoving(w, h, GameObjects, context, invodeSprite, SpriteImages, this)
 
@@ -173,9 +183,22 @@ class Game(var context: Context, view: TextView) {
         }
 
         if (delCoin >= 0) {
+            Log.d("GAMELOGIC", "Trying to delete: $delCoin")
             ExplosionPos = GameObjects[delCoin].Pos
 
             GameObjects.removeAt(delCoin)
+            if (isNewLevel){
+                if (mapNo == 3){
+                    LoadNewLevel(0)
+                    isNewLevel = false
+                    mapNo = 0
+                }else {
+                    LoadNewLevel(mapNo)
+                    isNewLevel = false
+                }
+
+
+            }
 
             delCoin = -1
             playExplosion = true
@@ -202,8 +225,6 @@ class Game(var context: Context, view: TextView) {
                 if (collider.isColliding()) {
                     Object.OnCollison()
                     delCoin = index
-                    counter++
-                    pointsView.text = "${context.resources.getString(R.string.points)} $counter"
                     Log.d("COOLSS", delCoin.toString())
 
 
@@ -214,6 +235,15 @@ class Game(var context: Context, view: TextView) {
             if (collider.isColliding()) {
                 Object.OnCollison()
                 delCoin = index
+                counter++
+
+                if (counter >= 2 && mapNo < 3){
+                    Log.d("GAMELOGIC", "IF")
+                    pointsView.text = "${context.resources.getString(R.string.points)} $counter"
+                    mapNo ++
+                    counter = 0
+                    isNewLevel = true
+                }
             }
 
         }

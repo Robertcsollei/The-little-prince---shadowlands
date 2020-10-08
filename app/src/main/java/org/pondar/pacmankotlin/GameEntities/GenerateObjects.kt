@@ -49,13 +49,14 @@ class GenerateObjects(var context: Context, var w: Int, var h: Int) {
         return SpaceShip(5, Shape2D(Vector2D(), Vector2D(), null), Ship,  Xunits, Yunits)
     }
 
-    fun InitEntities() {
+    fun InitEntities(mapNo: Int) {
 
+        GameObjects.clear()
         coinsInitialized = true
 
         if (coinsInitialized) {
 
-            Maps.getMap(0).forEachIndexed { rowIndex, row ->
+            Maps.getMap(mapNo).forEachIndexed { rowIndex, row ->
 
                 row.forEachIndexed { elemIndex, elem ->
                     var Y = rowIndex * Yunits
@@ -64,7 +65,7 @@ class GenerateObjects(var context: Context, var w: Int, var h: Int) {
                     var size = Vector2D()
                     if (elem == ReMap.coin.value) {
 
-                       GameObjects.add(GoldCoin(context, Shape2D(dimension, size, goldTexture)))
+                       GameObjects.add(GoldCoin(context, Shape2D(dimension, size, goldTexture), Xunits, Yunits))
                     }
                     if (elem == ReMap.enemy.value) {
 
@@ -89,9 +90,9 @@ class GenerateObjects(var context: Context, var w: Int, var h: Int) {
 
 
 
-    fun InitEnvironment(): ArrayList<Object2D> {
-
-        InitEntities()
+    fun InitEnvironment(mapNo: Int): ArrayList<Object2D> {
+        Enemies.clear()
+        InitEntities(mapNo)
 
         return GameObjects
     }
