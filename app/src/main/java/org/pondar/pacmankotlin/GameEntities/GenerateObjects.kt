@@ -20,7 +20,7 @@ class GenerateObjects(var context: Context, var w: Int, var h: Int) {
 
     var coinsInitialized = false
 
-    var goldTexture = R.drawable.coin
+    var goldTexture = R.drawable.meteor
 
     var Xunits = w / 5
     var Yunits = h / 8

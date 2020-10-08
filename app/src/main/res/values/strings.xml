@@ -6,6 +6,7 @@
     <string name="newgame">New Game</string>
 
     <string name="tileSize">50</string>
+    <string name="pause">Pause</string>
     <array name="Walls">
         <item>[0,12, PI/2]</item>
         <item>[0,12]</item>

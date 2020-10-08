@@ -35,9 +35,10 @@ class SpaceShip (override val life: Int, override var shape: Shape2D, override v
 
     fun keepMoving(AccePos: Float, width: Int, Height: Int) {
 
-
-        var newPos = width / 2 - AccePos * width/ 2 / 12
-        Pos = Vector2D(floor(newPos.toDouble()).toInt().toFloat(), (Height / 8 * 7).toFloat())
+        if(AccePos in -8F..12F) {
+            var newPos = width / 2 - AccePos * width / 2 / 12
+            Pos = Vector2D(floor(newPos.toDouble()).toInt().toFloat(), (Height / 8 * 7).toFloat())
+        }
 
 
     }
