@@ -20,6 +20,10 @@ class Collider(var Object: Object2D, var Pos: Vector2D, var size: Vector2D) {
         return Pos.x in Object.Pos.x - Xmid..Object.Pos.x + Xmid && Pos.y in Object.Pos.y - Ymid..Object.Pos.y + Ymid
     }
 
+    fun playerKilled(): Boolean {
+        return (Pos.x + 50 in Object.Pos.x - 50..Object.Pos.x + Object.Size.x) && (Pos.y + 50 in Object.Pos.y - 50..Object.Pos.y + Object.Size.y)
+        }
+
     fun CollectableCollision(): Vector2D? {
         if (Object.isCollectable) {
 

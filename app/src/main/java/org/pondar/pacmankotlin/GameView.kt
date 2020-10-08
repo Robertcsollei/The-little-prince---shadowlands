@@ -84,8 +84,17 @@ class GameView : View {
         var pacBit = Bitmap.createBitmap(game?.fireBall!!.bitmap!!,0, 0, BitSize.x.toInt(), BitSize.y.toInt(), newMatrix, true)
         canvas.drawBitmap(pacBit, game?.fireBall!!.Pos.x, game?.fireBall!!.Pos.y, paint)
 
+
        if(game?.isShooting!!){
-           canvas.drawBitmap(game?.projectile!!.bitmap, game?.projectile!!.Pos.x, game?.projectile!!.Pos.y, paint)
+
+
+           var projectMatrix = Matrix()
+           projectMatrix.postRotate(90F)
+
+           var projectileMap = Bitmap.createBitmap(game?.projectile!!.bitmap!!,0, 0,
+                   w / 5 / 2, ((w / 5 / 2) * 0.2).toInt(), projectMatrix, true)
+
+           canvas.drawBitmap(projectileMap, game?.projectile!!.Pos.x, game?.projectile!!.Pos.y, paint)
        }
 
         canvas.drawBitmap(game?.SpaceShip?.bitmap!!, game?.SpaceShip?.Pos!!.x, game?.SpaceShip?.Pos!!.y, paint )

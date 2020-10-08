@@ -17,6 +17,7 @@ import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
 import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
 import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
+import org.pondar.pacmankotlin.Interfaces.Objects.GoldCoin
 import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
 import java.util.*
 
@@ -31,6 +32,8 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
     var updateMS = 0
 
     var updateLong = 0
+
+    var SensorInput = ArrayList<Float>()
 
     lateinit var sensorManager: SensorManager
 
@@ -88,16 +91,25 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
             game?.setPacPosition(true)
         }
 
+
         if(updateLong >= 200){
 
                 if (game?.projectile?.isShooting!!){
                     game?.projectile?.keepMoving()
+
+                    game?.GameObjects!!.forEach{
+                        if(it is GoldCoin){
+                            it.keepMoving(game!!)
+                        }
+                    }
 
                     if(updateLong >= 8000){
                         updateLong = 0
                         game?.isShooting = false
                     }
             }
+        }else{
+
         }
 
         if (updateMS >= 200 && playExplosion!!){
@@ -183,7 +195,15 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-      game?.ShipPos = event?.values?.get(0)!!
+
+        SensorInput.add(event?.values?.get(0)!!)
+        if(SensorInput.count() > 30){
+            var LastInput = SensorInput.subList(SensorInput.count() - 20, SensorInput.count())
+            var result = LastInput.average()
+            game?.ShipPos = result.toFloat()
+        }else{
+            game?.ShipPos = 0.0F
+        }
     }
 
 
