@@ -1,34 +1,33 @@
 package org.pondar.pacmankotlin
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.pm.ActivityInfo
-import android.hardware.Sensor
-import android.hardware.SensorEvent
-import android.hardware.SensorEventListener
-import android.hardware.SensorManager
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
-import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import org.intellij.lang.annotations.Flow
-import org.pondar.pacmankotlin.Interfaces.Characters.Enemy
-import org.pondar.pacmankotlin.Interfaces.DataTypes.Vector2D
-import org.pondar.pacmankotlin.Interfaces.Objects.GoldCoin
-import org.pondar.pacmankotlin.Interfaces.Objects.Projectile
+import org.pondar.pacmankotlin.Game.Characters.Enemy
+import org.pondar.pacmankotlin.Game.GameObjects.GoldCoin
 import java.util.*
-import kotlin.collections.ArrayList
+import android.gesture.GestureLibraries
+import android.gesture.GestureLibrary
+import android.gesture.GestureOverlayView
+import android.gesture.GestureOverlayView.OnGesturePerformedListener
+import android.gesture.Gesture
+import android.util.Log
+import org.pondar.pacmankotlin.Engine.Physics.Forces
+import org.pondar.pacmankotlin.Engine.Physics.GravityForce
+import org.pondar.pacmankotlin.Game.Input.Accelerometer
+import org.pondar.pacmankotlin.Game.Input.TouchEvent
 
+class MainActivity : AppCompatActivity(),  OnGesturePerformedListener  {
 
-class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListener  {
+    var gLibrary: GestureLibrary?= null
 
     //reference to the game class.
-    private var game: Game? = null
+    private var gameController: GameController? = null
 
     val TimerFunction: Timer = Timer()
 
@@ -36,32 +35,36 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
 
     var updateLong = 0
 
-    var SensorInput = ArrayList<Float>()
-
-    lateinit var sensorManager: SensorManager
-
     var isPaused = false
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
         setContentView(R.layout.activity_main)
-        requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        setContentView(R.layout.activity_main)
-        game = Game(this,pointsView)
+        gameController = GameController(this)
 
-        gameView.setOnTouchListener(this)
 
-        sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        sensorManager.registerListener(
-                this,
-                sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_GAME
-        )
 
-        game?.setGameView(gameView)
-        gameView.setGame(game)
-        game?.newGame()
+        this.getSupportActionBar()?.hide();
+        window.decorView.apply {
+            systemUiVisibility = View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_FULLSCREEN
+            actionBar?.hide()
+
+        }
+
+
+        gestureSetup()
+
+        gameController?.setGameView(gameView)
+        gameView.setGame(gameController)
+        gameController?.newGame()
+
+        //Registering listeners
+        TouchEvent( gameController, gameView, this ).setListener()
+        Accelerometer(gameController, this).setListener()
+
 
         TimerFunction.schedule(object :TimerTask(){
             override fun run(){
@@ -69,13 +72,14 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
             }
         }, 0, 10)
 
+    }
 
-
-
-       // mainHandler.post(updatePos)
-
-
-
+    private fun gestureSetup(){
+        gLibrary = GestureLibraries.fromRawResource(this, R.raw.gesture)
+        if(gLibrary?.load() == false){
+            finish()
+        }
+        gestureOverlay.addOnGesturePerformedListener(this)
     }
 
     fun pauseContinue(view: View){
@@ -91,6 +95,7 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
     }
 
     fun UpdateFunction() {
+        Log.d("asdasdlwukjl", gameController!!.fps.count().toString())
         if(!isPaused) {
             this.runOnUiThread(Update)
         }
@@ -98,29 +103,49 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
 
     val Update = Runnable {
 
-        var playExplosion = game?.playExplosion
+        var playExplosion = gameController?.playExplosion
         updateMS += 10
         updateLong += 10
+
         if(updateMS >= 200){
             updateMS = 0
-            game?.setPacPosition(true)
+            gameController?.setPacPosition(true)
+
+
         }
 
 
         if(updateLong >= 200){
+           // GravityForce(gameController?.w!! , gameController?.SpaceShip?.Pos!!, gameController?.SpaceShip?.Size!!, gameController!!).addGravity()
+           // GravityForce(gameController?.GameObjects!!, gameController?.Player!!, gameController!!, updateLong).applyGravity()
 
-                if (game?.projectile?.isShooting!!){
-                    game?.projectile?.keepMoving()
+//            if(gameController?.jump!!){
+//                Force(gameController!!, updateLong).ApplyForce("right")
+//            }
 
-                    game?.GameObjects!!.forEach{
+
+            Forces(gameController!!).gravity()
+            if(gameController!!.jump){
+                gameController!!.Player.jump()
+                Log.d("updateLong", gameController!!.Player.jump().toString())
+
+            }
+
+            gameController!!.Player.Update()
+
+
+                if (gameController?.projectile?.isShooting!!){
+                    gameController?.projectile?.keepMoving()
+
+                    gameController?.GameObjects!!.forEach{
                         if(it is GoldCoin){
-                            it.keepMoving(game!!)
+                            it.keepMoving(gameController!!)
                         }
                     }
 
                     if(updateLong >= 8000){
                         updateLong = 0
-                        game?.isShooting = false
+                        gameController?.isShooting = false
                     }
             }
         }else{
@@ -128,91 +153,37 @@ class MainActivity : AppCompatActivity(), View.OnTouchListener, SensorEventListe
         }
 
         if (updateMS >= 200 && playExplosion!!){
-            game?.setPacPosition(false)
+            gameController?.setPacPosition(false)
         }
-        game?.setPacPosition(false)
+        gameController?.setPacPosition(false)
 
 
-        game?.GameObjects?.forEach {
+        gameController?.GameObjects?.forEach {
             if(it is Enemy){
 
-                it.keepMoving( game?.w!!, game?.h!!)
+                it.keepMoving( gameController?.w!!, gameController?.h!!)
 
             }
         }
 
-        //Object Motion
-        //Enemy Motion
-        //Projectile Motion
-        //Collision detection
     }
 
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.main, menu)
-        return true
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        val id = item.itemId
-        if (id == R.id.action_settings) {
-            Toast.makeText(this, "settings clicked", Toast.LENGTH_LONG).show()
-            return true
-        } else if (id == R.id.action_newGame) {
-            Toast.makeText(this, "New Game clicked", Toast.LENGTH_LONG).show()
-            game?.newGame()
-            return true
-        }
-        return super.onOptionsItemSelected(item)
-    }
 
-    override fun onTouch(v: View?, event: MotionEvent?): Boolean {
 
-        when (event!!.action) {
-            MotionEvent.ACTION_DOWN -> {
-                game?.fireBall?.Pos = Vector2D(game?.SpaceShip!!.Pos.x + game?.fireBall!!.Resize, game?.SpaceShip!!.Pos.y + game?.fireBall!!.Resize)
-                game?.fireBall?.Initial = Vector2D(game?.SpaceShip!!.Pos.x, game?.SpaceShip!!.Pos.y)
-                game?.fireBall?.isMoving = !game?.fireBall?.isMoving!!
-            }
-            MotionEvent.ACTION_MOVE -> {
-                game?.fireBall?.Pos = Vector2D(game?.SpaceShip!!.Pos.x + game?.SpaceShip!!.Size.x/2, game?.SpaceShip!!.Pos.y + game?.SpaceShip!!.Size.y/2)
-                game?.aimForm = Vector2D(game?.SpaceShip!!.Pos.x + game?.SpaceShip!!.Size.x/2, game?.SpaceShip!!.Pos.y + game?.SpaceShip!!.Size.y/2)
-                game?.aimAt = Vector2D(event.x, event.y)
-            }
-            MotionEvent.ACTION_UP -> {
-                game?.fireBall?.timer = gameView.width/7
-                game?.fireBall?.move( Vector2D(event.x, event.y) , game!!, gameView!!)
+    override fun onGesturePerformed(overlay: GestureOverlayView?, gesture: Gesture?) {
+        val predictions = gLibrary?.recognize(gesture)
 
-                game?.aimAt = Vector2D()
-                game?.aimForm = Vector2D()
-
+        predictions?.let{
+            if(it.size > 0 && it[0].score > 1.0){
+                val action = it[0].name
+                Toast.makeText(this, action,Toast.LENGTH_SHORT).show()
             }
         }
-        gameView.invalidate()
 
-
-        return true
-    }
-
-    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
-
-    }
-
-    override fun onSensorChanged(event: SensorEvent?) {
-
-
-        SensorInput.add(event?.values?.get(0)!!)
-        if(SensorInput.count() > 30){
-            var LastInput = SensorInput.subList(SensorInput.count() - 20, SensorInput.count())
-            var result = LastInput.average() *2
-            game?.ShipPos = result.toFloat()
-        }else{
-            game?.ShipPos = 0.0F
-        }
     }
 
 
 }
+
+
