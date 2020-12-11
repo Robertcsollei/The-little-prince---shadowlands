@@ -32,12 +32,11 @@ class GameController(var context: Context) {
     lateinit var fireBall: FireBall
     lateinit var Player: Player
 
-    var GenerateObjects = GenerateObjects(context, 0, 0)
+    var GenerateObjects = GenerateObjects(context, 0, 0, this)
 
     var BoundingBoxArray: ArrayList<BoundingBox> = arrayListOf(BoundingBox(150F,150F, 550F, 250F))
 
     var gravityOn = true
-    var jump = false
     var ForceFrameTimer = 0
     var Momentum = Vector2D()
     var colliding = false
@@ -58,6 +57,8 @@ class GameController(var context: Context) {
     var delCoin = -1
 
     var ShipPos = 0F
+
+    var mapSpped = 2F
 
     var SpriteImages = arrayListOf<Int>(R.drawable.frame1, R.drawable.frame2, R.drawable.frame3,
             R.drawable.frame4, R.drawable.frame5, R.drawable.frame6, R.drawable.frame7, R.drawable.frame8)
@@ -100,7 +101,7 @@ class GameController(var context: Context) {
 
 
         if (coinsInitialized) {
-            GenerateObjects = GenerateObjects(context, w, h)
+            GenerateObjects = GenerateObjects(context, w, h, this)
 
             LoadNewLevel(mapNo)
             Enemies = GenerateObjects.Enemies
@@ -117,7 +118,7 @@ class GameController(var context: Context) {
                 }
 
 
-            Log.d("JKFHJHKD", randomEnemyShooting().toString())
+
 //            randomEnemy = Enemies.get(randomEnemyShooting())
 
         }
@@ -132,7 +133,7 @@ class GameController(var context: Context) {
 
 
     fun LoadNewLevel(levelNo: Int){
-        Log.d("GAMELOGIC", "Load level: ${levelNo}")
+
         GameObjects = if (mapNo > 0){
 
             GenerateObjects.InitEnvironment(levelNo)
@@ -175,7 +176,7 @@ class GameController(var context: Context) {
 
 
     fun aim(): Wall {
-        return Wall(context, Shape2D(aimForm, aimAt, 1), BoundingBox(true))
+        return Wall(context, Shape2D(aimForm, aimAt, 1), BoundingBox(true), false)
     }
 
 
@@ -189,13 +190,25 @@ class GameController(var context: Context) {
 
         Player.keepMoving(ShipPos, w, h)
 
+
+
+        GameObjects.forEach{
+            it.shape.left -= mapSpped
+            it.shape.right -= mapSpped
+            it.BoundingBox?.Pos!!.x -= mapSpped
+            if(it is Enemy) {
+                it.Update()
+            }
+
+        }
+
         if (playExplosion) {
             Explosion.Explode(ExplosionPos, this, context)
 
         }
 
         if (delCoin >= 0) {
-            Log.d("GAMELOGIC", "Trying to delete: $delCoin")
+
             ExplosionPos = GameObjects[delCoin].Pos
 
             GameObjects.removeAt(delCoin)
@@ -237,7 +250,7 @@ class GameController(var context: Context) {
                 if (collider.isColliding()) {
                     Object.OnCollison()
                     delCoin = index
-                    Log.d("COOLSS", delCoin.toString())
+                  //  Log.d("COOLSS", delCoin.toString())
                     newGame()
 
 
@@ -251,7 +264,7 @@ class GameController(var context: Context) {
                 counter++
 
                 if (counter >= Enemies.count() && mapNo < 3){
-                    Log.d("GAMELOGIC", "IF")
+                  //  Log.d("GAMELOGIC", "IF")
 
                     mapNo ++
                     counter = 0

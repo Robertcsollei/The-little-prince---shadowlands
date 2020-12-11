@@ -21,6 +21,7 @@ class FireBall(override val life: Int, override var shape: Shape2D, override var
     var Resize = 12
     var SwipeTrashhold = 50
     var descSpeed = 0.5
+    override var dead = false
     override var speed = 15.0F
     override var isStatic: Boolean = false
     override var isCollectable: Boolean = false
@@ -31,6 +32,7 @@ class FireBall(override val life: Int, override var shape: Shape2D, override var
     override var Direction: Vector2D = Vector2D()
     override var ResizeBitmap: BitMapConverter = BitMapConverter()
     override var VertexMatrix: ArrayList<ArrayList<Vector2D>>? = null
+    override var isGround: Boolean = false
     var timer: Int = 0
     var temptimer= 0
     var reset = 1F
@@ -62,13 +64,13 @@ class FireBall(override val life: Int, override var shape: Shape2D, override var
 
             GameObejct.forEach{
                 var collision: Collision = Collision(it, Pos, Direction)
-                Direction = collision.GeneralColision()
+
 
             }
 
             //Out of Bounds
            var BoundsCollider = Collision(this, Pos, Size)
-            BoundsCollider.OutOfBoundCollision(gameController, w, h)
+
 
 
 

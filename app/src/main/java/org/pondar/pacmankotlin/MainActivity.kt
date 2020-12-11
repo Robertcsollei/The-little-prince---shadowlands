@@ -18,7 +18,7 @@ import android.gesture.GestureOverlayView.OnGesturePerformedListener
 import android.gesture.Gesture
 import android.util.Log
 import org.pondar.pacmankotlin.Engine.Physics.Forces
-import org.pondar.pacmankotlin.Engine.Physics.GravityForce
+import org.pondar.pacmankotlin.Game.GameObjects.Wall
 import org.pondar.pacmankotlin.Game.Input.Accelerometer
 import org.pondar.pacmankotlin.Game.Input.TouchEvent
 
@@ -95,7 +95,7 @@ class MainActivity : AppCompatActivity(),  OnGesturePerformedListener  {
     }
 
     fun UpdateFunction() {
-        Log.d("asdasdlwukjl", gameController!!.fps.count().toString())
+
         if(!isPaused) {
             this.runOnUiThread(Update)
         }
@@ -125,13 +125,14 @@ class MainActivity : AppCompatActivity(),  OnGesturePerformedListener  {
 
 
             Forces(gameController!!).gravity()
-            if(gameController!!.jump){
+            if(gameController!!.Player.jump != 0F){
                 gameController!!.Player.jump()
-                Log.d("updateLong", gameController!!.Player.jump().toString())
+                Log.d("updateLong", gameController!!.Player.wallCollision.toString())
 
             }
 
             gameController!!.Player.Update()
+
 
 
                 if (gameController?.projectile?.isShooting!!){
@@ -140,6 +141,7 @@ class MainActivity : AppCompatActivity(),  OnGesturePerformedListener  {
                     gameController?.GameObjects!!.forEach{
                         if(it is GoldCoin){
                             it.keepMoving(gameController!!)
+
                         }
                     }
 
@@ -178,6 +180,15 @@ class MainActivity : AppCompatActivity(),  OnGesturePerformedListener  {
             if(it.size > 0 && it[0].score > 1.0){
                 val action = it[0].name
                 Toast.makeText(this, action,Toast.LENGTH_SHORT).show()
+                when ((it[0].name)) {
+
+                    "rightToLeft" -> {
+                        gameController?.Player!!.strikeDir = 1
+                    }
+                    "rightHook" -> {
+                        gameController?.Player!!.strikeDir = 1
+                    }
+                }
             }
         }
 

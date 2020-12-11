@@ -5,6 +5,8 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Toast
+import org.pondar.pacmankotlin.Engine.Collections.Orientations
+import org.pondar.pacmankotlin.Engine.DatatTypes.Vector2D
 import org.pondar.pacmankotlin.GameController
 import org.pondar.pacmankotlin.GameView
 import org.pondar.pacmankotlin.MainActivity
@@ -26,12 +28,16 @@ class TouchEvent(var gameController: GameController?, var gameView: GameView?, v
             MotionEvent.ACTION_DOWN -> {
                 tStart = System.currentTimeMillis()
 
+                gameController!!.gravityOn = true
+
             }
             MotionEvent.ACTION_MOVE -> {
+
 
             }
             MotionEvent.ACTION_UP -> {
                 tEnd = System.currentTimeMillis()
+
 
 
             }
@@ -40,11 +46,12 @@ class TouchEvent(var gameController: GameController?, var gameView: GameView?, v
 
         val elapsedSeconds = tDelta / 1000.0
 
-        if(elapsedSeconds > 0.1){
-            Log.d("TIMEE", elapsedSeconds.toString())
+        if(elapsedSeconds > 0.05){
+
             Toast.makeText(main, "click", Toast.LENGTH_SHORT).show()
-            gameController?.jump = true
+            gameController?.Player!!.jump = 5F
             gameController!!.Player.jumpTimer = 0
+
 
         }
 

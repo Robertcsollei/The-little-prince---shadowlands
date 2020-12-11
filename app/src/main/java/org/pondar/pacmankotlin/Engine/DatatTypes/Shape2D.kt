@@ -9,8 +9,8 @@ class Shape2D(dimensions: Vector2D, size: Vector2D, var  color: Int?) {
 
     var pos = dimensions
     var size = size
-    var left = dimensions.x
-    var top = dimensions.y
+    var left = pos.x
+    var top = pos.y
     var right = size.x
     var bottom = size.y
 

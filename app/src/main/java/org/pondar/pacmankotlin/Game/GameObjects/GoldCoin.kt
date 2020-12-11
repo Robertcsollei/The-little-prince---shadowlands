@@ -17,12 +17,14 @@ class GoldCoin(context: Context, newShape: Shape2D, var XUnit: Int, var YUnit: I
 
     override var bitmap: Bitmap? = BitmapFactory.decodeResource(context.resources, shape.color!!)
    override var Pos = shape.pos
+    override var dead = false
     //Figure this out
    override var Size = Vector2D(bitmap?.width?.toFloat()!!, bitmap?.height?.toFloat()!!)
     override var VertexMatrix: ArrayList<ArrayList<Vector2D>>? = null
     override var isStatic: Boolean = true
     override var isCollectable: Boolean = true
     override var isCollected = false
+    override var isGround: Boolean = false
     var ResizeBit = BitMapConverter()
     var speed: Float = 2F
     override var BoundingBox: BoundingBox? = BoundingBox(shape.pos.x, shape.pos.y, shape.size.x, shape.size.y)

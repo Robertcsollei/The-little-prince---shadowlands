@@ -2,10 +2,13 @@ package org.pondar.pacmankotlin.Engine.Physics
 
 import android.util.Log
 import org.pondar.pacmankotlin.Engine.Adapters.Ranges
+import org.pondar.pacmankotlin.Engine.Collections.Orientations
+import org.pondar.pacmankotlin.Engine.DatatTypes.CollisionObject
 import org.pondar.pacmankotlin.GameController
 import org.pondar.pacmankotlin.Game.Characters.Enemy
 import org.pondar.pacmankotlin.Engine.Interfaces.Object2D
 import org.pondar.pacmankotlin.Engine.DatatTypes.Vector2D
+import org.pondar.pacmankotlin.Game.GameObjects.Empty
 
 class Collision(var Object: Object2D, var Pos: Vector2D, var size: Vector2D) {
 
@@ -31,7 +34,7 @@ class Collision(var Object: Object2D, var Pos: Vector2D, var size: Vector2D) {
 
     fun playerKilled(): Boolean {
         return (Pos.x + 50 in Object.Pos.x - 50..Object.Pos.x + Object.Size.x) && (Pos.y + 50 in Object.Pos.y - 50..Object.Pos.y + Object.Size.y)
-        }
+    }
 
     fun CollectableCollision(): Vector2D? {
         if (Object.isCollectable) {
@@ -52,72 +55,128 @@ class Collision(var Object: Object2D, var Pos: Vector2D, var size: Vector2D) {
     }
 
 
+    fun WallCollision(): CollisionObject? {
 
 
+        val ySize = Object.BoundingBox?.Size!!.y
+        val xSize = Object.BoundingBox?.Size!!.x
 
-    fun WallCollision(): Vector2D? {
-
-        if (Object.isStatic && !Object.isCollectable) {
-
-            val ySize = Object.BoundingBox?.Size!!.y
-            val xSize = Object.BoundingBox?.Size!!.x
-
-            //Range on the X axis on which I am checking the collision of two bounding boxes
-            val xMin = Object.BoundingBox?.Pos!!.x
-            val xMax = Object.BoundingBox?.Pos!!.x + xSize
-            var xRange = xMin.. xMax
+        //Range on the X axis on which I am checking the collision of two bounding boxes
+        val xMin = Object.BoundingBox?.Pos!!.x
+        val xMax = Object.BoundingBox?.Pos!!.x + xSize
+        var xRange = xMin..xMax
 
 
-            //Range on the Y axis on which I am checking the collision of two bounding boxes
-            val yMin = Object.BoundingBox?.Pos!!.y
-            val yMax = Object.BoundingBox?.Pos!!.y + ySize
-            var yRange =  yMin.. yMax
+        /*
+        * check point in triangle method
+        * pass in all 4 points of the obj to Check ==> Player
+        * return the name of the triangle where the collision happened
+        *
+        * */
 
+        //Range on the Y axis on which I am checking the collision of two bounding boxes
+        val yMin = Object.BoundingBox?.Pos!!.y
+        val yMax = Object.BoundingBox?.Pos!!.y + ySize
+        val yRange = yMin..yMax
 
-            if(Object.VertexMatrix == null){
+        val bigXRange = Pos.x - xSize..Pos.x + size.x + xSize
+        val bigYRange = Pos.y - ySize..Pos.y + size.y + ySize
 
-               Object.VertexMatrix = Ranges().CreateVertexMatrix(xMin, xMax, yMin, yMax)
-                Log.d("asdasdasda", Object.VertexMatrix!![0][0].toString())
+        var collisionObject = CollisionObject()
 
+        if (Ranges().RangeContains(xMin,xSize, bigXRange)) {
+            if(Object is Enemy){
+              collisionObject.isEnemey = true
+            }
+            collisionObject.ReachableBoxDetected = true
+            collisionObject.target = Object
+
+            //If collision happens
+            if (Ranges().RangeContainsBoth(Pos, size, xRange, yRange)) {
+
+            if(Object is Empty){
+                collisionObject.isEmpty = true
             }
 
-            //Collision on both axis
-            if (Ranges().RangeContainsEither(Pos, size, xRange, yRange)){
 
-                //Collision on the Y axis, falling down
-                if (Ranges().RangeContains(Pos.y, size.y, yRange))
-                {
-                    Log.d("HHHHHHHH","as")
-                    return if(Pos.y < yMin + (ySize / 2)){
-                        Vector2D(0F,1F)
-                    }else{
-                        Vector2D(0F, -1F)
+                val corners = arrayOf(Vector2D(Pos.x, Pos.y), Vector2D(Pos.x + size.x, Pos.y), Vector2D(Pos.x, Pos.y + size.y), Vector2D(Pos.x + size.x, Pos.y + size.y))
+
+
+
+//                var collisionSides = ArrayList<String>()
+//                var groundCollision = ArrayList<String>()
+
+                corners.forEachIndexed { index, it ->
+
+                    val colOfPoint = Ranges().collisionDirection(it, xMin, xMax, yMin, yMax)
+
+
+                    if (!colOfPoint.Equals(Vector2D())) {
+
+                        if (!Object.isGround) {
+
+                            collisionObject.collisionDirections.add(Orientations.Down.Direction)
+                        } else {
+                            if (Object.isGround) {
+                                collisionObject.ground = true
+                            }
+                        }
                     }
                 }
+
+
+
+
+                return collisionObject
+
+//
+//                if(groundCollision.contains("top")){
+//                    return Orientations.Up.Direction
+//                }
+//
+//                else if (collisionSides.count() != 0){
+//
+//
+//
+//                    when {
+//                        collisionSides.contains("right") -> {
+//                            return Orientations.Left.Direction
+//                        }
+//                        collisionSides.contains("bottom") -> {
+//                            return Orientations.Down.Direction
+//                        }
+//                        collisionSides.contains("left") -> {
+//                            return Orientations.Right.Direction
+//                        }
+//                        else -> {
+//                            val xCollision = Ranges().RangeContainsDirectional(Pos.x, size.x, xRange)
+//                            if (xCollision != null) {
+//
+//                                return when (xCollision) {
+//                                    1 -> {
+//                                        Orientations.Left.Direction
+//                                    }
+//                                    -1 -> {
+//                                        Orientations.Right.Direction
+//                                    }
+//                                    else -> {
+//                                        Vector2D()
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+
 
                 //Collision on the X axis, hitting a wall
-                if(Ranges().RangeContains(Pos.x, size.x, xRange)) {
-                    Log.d("HHHHHHHH", "X")
-                    return if(Pos.x < xMin + (xSize / 2)){
-                        Vector2D(-1F, 0F)
-                    }else{
-                        Vector2D(1F, 0F)
-                    }
-                }else{
-                    return Vector2D()
-                }
+
 
             }
-
-
-
-            else{
-
-                return null
-            }
-
+            return collisionObject
         }
         return null
+
+
     }
 
     fun EnemyCollision(): Vector2D? {
@@ -157,17 +216,20 @@ class Collision(var Object: Object2D, var Pos: Vector2D, var size: Vector2D) {
         }
         return result
 
+
     }
 
-    fun OutOfBoundCollision(gameController: GameController, w: Int, h: Int) {
+    fun OutOfBoundCollision(gameController: GameController, w: Int, h: Int): Vector2D {
         if (Pos.x > w - size.x || Pos.x < 10) {
-            Log.d("FFFFFF", "RRRRR")
-           // Vector2D(Direction.x * -1, Direction.y)
+
+            // Vector2D(Direction.x * -1, Direction.y)
         }
         if (Pos.y > h - size.y || Pos.y < 10) {
 
             //Vector2D(Direction.x, Direction.y * -1)
         }
+        return Vector2D()
     }
+
 
 }

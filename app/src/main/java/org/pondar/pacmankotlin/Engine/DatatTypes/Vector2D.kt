@@ -58,6 +58,13 @@ class Vector2D(VecX: Float, VecY:Float){
         return "[${x}, ${y}]"
     }
 
+    fun Equals(targetVector: Vector2D): Boolean{
+        return this.x == targetVector.x && this.y == targetVector.y
+    }
+    fun notEquals(targetVector: Vector2D): Boolean {
+        return this.x != targetVector.x || this.y != targetVector.y
+    }
+
     constructor() : this(0F,0F)
 
 

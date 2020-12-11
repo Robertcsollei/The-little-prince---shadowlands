@@ -21,6 +21,7 @@ class GameView : View {
 
     var ResizeBitmap: BitMapConverter = BitMapConverter()
 
+
     var newMatrix = Matrix()
 
     fun setGame(gameController: GameController?) {
@@ -43,7 +44,6 @@ class GameView : View {
     //drawn whenever we update the screen.
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
-
 
 
         //Here we get the height and weight
@@ -103,12 +103,15 @@ class GameView : View {
 
 
             if (gameController!!.coinsInitialized) {
-
                 for(GameEntity in gameController?.GameObjects!!){
                     if(GameEntity.bitmap == null){
                         paint.setColor(Color.DKGRAY);
-                         drawRect(GameEntity.shape)
+                        canvas.drawRect(GameEntity.shape.left, GameEntity.shape.top, GameEntity.shape.right, GameEntity.shape.bottom, paint)
+
+                    }else{
+                        canvas.drawBitmap(GameEntity.bitmap!!, GameEntity.Pos!!.x, GameEntity.Pos!!.y, paint)
                     }
+
                 }
 
 ////

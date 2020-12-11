@@ -16,5 +16,7 @@ interface Object2D {
     var isCollected: Boolean
     var BoundingBox: BoundingBox?
     var VertexMatrix: ArrayList<ArrayList<Vector2D>>?
+    var isGround: Boolean
+    var dead: Boolean
     fun OnCollison()
 }
