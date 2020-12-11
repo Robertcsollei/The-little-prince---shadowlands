@@ -105,17 +105,13 @@ class GameController(var context: Context) {
 
             LoadNewLevel(mapNo)
             Enemies = GenerateObjects.Enemies
-            randomPos = randomEnemyShooting()
-            randomEnemy = Enemies.elementAt(randomPos)
+
+
 
             fireBall = GenerateObjects.InitFireBall()
             Player = GenerateObjects.InitPlayer()
 
-                if(!isShooting){
-                    projectile = Projectile(randomEnemy.Pos, w/5, h/8, context, this)
-                    isShooting = true
-                    projectile.isShooting = true
-                }
+
 
 
 
@@ -125,11 +121,6 @@ class GameController(var context: Context) {
 
     }
 
-    fun randomEnemyShooting(): Int{
-        //if ms % 200 0 - Rando Bger 0,5
-        var Random = Random()
-        return Random.nextInt(Enemies.count())
-    }
 
 
     fun LoadNewLevel(levelNo: Int){
@@ -196,6 +187,9 @@ class GameController(var context: Context) {
             it.shape.left -= mapSpped
             it.shape.right -= mapSpped
             it.BoundingBox?.Pos!!.x -= mapSpped
+            if(it.BoundingBox!!.Pos.x < -5750) {
+                newGame()
+            }
             if(it is Enemy) {
                 it.Update()
             }
